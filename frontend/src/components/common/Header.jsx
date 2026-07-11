@@ -80,7 +80,7 @@ function Header({ simple = false }) {
               onClick={handleLogout}
             >
               <span className="header__avatar">성</span>
-              <span className="header__user-name">고성민</span>
+              <span className="header__user-name">사용자</span>
             </button>
           </div>
         </>
