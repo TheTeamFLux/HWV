@@ -71,6 +71,11 @@ public class PdfService {
 
         String text = extractText(file);
 
+        // 너무 긴 PDF는 앞부분만 사용
+        if (text.length() > 15000) {
+            text = text.substring(0, 15000);
+        }
+
         return geminiService.summarize(text);
     }
 

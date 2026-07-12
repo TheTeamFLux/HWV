@@ -51,7 +51,8 @@ public class GeminiService {
             return part.get("text").toString();
 
         } catch (Exception e) {
-            return "요약 실패";
+            e.printStackTrace();
+            throw new RuntimeException("Gemini 요약 실패", e);
         }
     }
 }
