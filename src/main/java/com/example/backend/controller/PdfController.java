@@ -5,8 +5,13 @@ import com.example.backend.service.PdfService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import com.example.backend.entity.PdfFile;
+import com.example.backend.service.PdfService;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.List;
 @RestController
 @RequestMapping("/pdf")
 public class PdfController {
@@ -22,6 +27,17 @@ public class PdfController {
 
         PdfFile pdf = pdfService.upload(file);
 
-        return pdf.getFileName() + " 업로드 성공!";
+        return pdf.getOriginalName() + " 업로드 성공!";
+    }
+
+    @PostMapping("/extract")
+    public String extract(@RequestParam MultipartFile file) throws IOException {
+
+        return pdfService.extractText(file);
+
+    }
+    @GetMapping("/list")
+    public List<PdfFile> getPdfList() {
+        return pdfService.getAllPdfFiles();
     }
 }

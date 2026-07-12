@@ -7,13 +7,20 @@ Content-Type: application/json
   "name": "예령"
 }
 ###
-POST http://localhost:8080/users/register
+POST http://localhost:8080/pdf/list
 Content-Type: application/json
 
 {
-  "email":"test@test.com",
-  "password":"1234",
-  "name":"예령"
+  "id":1,
+  "originalName":"자료구조.pdf",
+  "savedName":"9d8f2c_자료구조.pdf",
+  "filePath":"uploads/9d8f2c_자료구조.pdf"
 }
 
 ###
+POST http://localhost:8080/summary
+Content-Type: application/json
+
+{
+  "text": "인공지능은 인간의 학습을 돕는 기술이며 생성형 AI는 교육 분야에서 활발히 사용되고 있다."
+}

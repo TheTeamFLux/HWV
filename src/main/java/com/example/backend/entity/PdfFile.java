@@ -10,7 +10,9 @@ public class PdfFile {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String fileName;
+    private String originalName;
+
+    private String savedName;
 
     private String filePath;
 
@@ -21,12 +23,20 @@ public class PdfFile {
         return id;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getOriginalName() {
+        return originalName;
     }
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
+
+    public String getSavedName() {
+        return savedName;
+    }
+
+    public void setSavedName(String savedName) {
+        this.savedName = savedName;
     }
 
     public String getFilePath() {
