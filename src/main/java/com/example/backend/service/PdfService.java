@@ -73,4 +73,5 @@ public class PdfService {
 
         return geminiService.summarize(text);
     }
+
 }

@@ -40,4 +40,10 @@ public class PdfController {
     public List<PdfFile> getPdfList() {
         return pdfService.getAllPdfFiles();
     }
+    @PostMapping("/summary")
+    public String summary(@RequestParam MultipartFile file) throws IOException {
+
+        return pdfService.summarize(file);
+
+    }
 }
