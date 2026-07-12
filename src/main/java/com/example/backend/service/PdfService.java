@@ -15,9 +15,13 @@ import java.util.UUID;
 public class PdfService {
 
     private final PdfFileRepository pdfRepository;
+    private final GeminiService geminiService;
 
-    public PdfService(PdfFileRepository pdfRepository) {
+    public PdfService(PdfFileRepository pdfRepository,
+                      GeminiService geminiService) {
+
         this.pdfRepository = pdfRepository;
+        this.geminiService = geminiService;
     }
 
     public PdfFile upload(MultipartFile file) throws IOException {
@@ -61,5 +65,12 @@ public class PdfService {
         document.close();
 
         return text;
+    }
+
+    public String summarize(MultipartFile file) throws IOException {
+
+        String text = extractText(file);
+
+        return geminiService.summarize(text);
     }
 }
