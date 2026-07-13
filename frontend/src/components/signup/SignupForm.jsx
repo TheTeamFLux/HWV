@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { signupUser } from "../../services/authApi";
+import { rememberRegisteredUser } from "../../services/session";
 import Button from "../common/Button";
 import "./SignupForm.css";
 
@@ -67,6 +68,11 @@ function SignupForm() {
 
       console.log("회원가입 성공:", result);
 
+      rememberRegisteredUser({
+        name: formData.name,
+        email: formData.email,
+      });
+
       alert("회원가입이 완료되었습니다. 로그인해 주세요.");
       navigate("/login");
     } catch (error) {
@@ -83,7 +89,7 @@ function SignupForm() {
         <h2>회원가입</h2>
 
         <p>
-          <strong>SumQuiz</strong>와 함께 새로운 학습을 시작하세요.
+          <strong>HWV</strong>와 함께 코딩 학습을 시작하세요.
         </p>
       </div>
 

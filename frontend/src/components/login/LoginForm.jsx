@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import Button from "../common/Button";
+import { saveLoginUser } from "../../services/session";
 import "./LoginForm.css";
 
 function LoginForm() {
@@ -47,6 +48,8 @@ function LoginForm() {
 
       console.log("로그인 성공", result);
 
+      saveLoginUser(result, formData.email);
+
       navigate("/home");
     } catch (error) {
       console.error(error);
@@ -64,7 +67,7 @@ function LoginForm() {
         <h2>로그인</h2>
 
         <p>
-          <strong>SumQuiz</strong>에 오신 것을 환영합니다!
+          <strong>HWV</strong>에 오신 것을 환영합니다!
         </p>
       </div>
 
