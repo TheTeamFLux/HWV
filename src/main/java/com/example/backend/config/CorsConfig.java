@@ -18,7 +18,7 @@ public class CorsConfig { //s
                                 "http://localhost:5173",
                                 "https://hwv.vercel.app",
                                 "https://relaxed-alpaca-73fcc7.netlify.app",
-                                "https://fabulous-pothos-d4a9b4.netlify.app",
+                                "https://fabulous-pothos-d4a9b4.netlify.app"
 
                         )
                         .allowedMethods(
