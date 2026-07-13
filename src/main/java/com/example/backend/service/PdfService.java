@@ -69,9 +69,9 @@ public class PdfService {
 
     public String summarize(MultipartFile file) throws IOException {
 
-        String text = extractText(file);
+            String text = extractText(file);
 
-        // 너무 긴 PDF는 앞부분만 사용
+            // 너무 긴 PDF는 앞부분만 사용
         if (text.length() > 15000) {
             text = text.substring(0, 15000);
         }

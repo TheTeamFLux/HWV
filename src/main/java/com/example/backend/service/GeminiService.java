@@ -22,32 +22,48 @@ public class GeminiService {
 
     private String callGemini(String prompt) {
 
-        Map<String, Object> body = Map.of(
-                "contents", new Object[]{
-                        Map.of(
-                                "parts", new Object[]{
-                                        Map.of("text", prompt)
-                                }
-                        )
-                }
-        );
+        try {
 
-        Map response = webClient.post()
-                .uri("/v1beta/models/gemini-2.5-flash:generateContent")
-                .header("X-goog-api-key", apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+            Map<String, Object> body = Map.of(
+                    "contents", new Object[]{
+                            Map.of(
+                                    "parts", new Object[]{
+                                            Map.of("text", prompt)
+                                    }
+                            )
+                    }
+            );
 
-        var candidates = (java.util.List<?>) response.get("candidates");
-        var candidate = (Map<?, ?>) candidates.get(0);
-        var content = (Map<?, ?>) candidate.get("content");
-        var parts = (java.util.List<?>) content.get("parts");
-        var part = (Map<?, ?>) parts.get(0);
+            Map response = webClient.post()
+                    .uri("/v1beta/models/gemini-flash-latest:generateContent")
+                    .header("X-goog-api-key", apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
 
-        return part.get("text").toString();
+            System.out.println(response);
+
+            var candidates = (List<?>) response.get("candidates");
+
+            if (candidates == null || candidates.isEmpty()) {
+                return "Gemini 응답에 candidates가 없습니다.\n" + response;
+            }
+
+            var candidate = (Map<?, ?>) candidates.get(0);
+            var content = (Map<?, ?>) candidate.get("content");
+            var parts = (List<?>) content.get("parts");
+            var part = (Map<?, ?>) parts.get(0);
+
+            return part.get("text").toString();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return e.getMessage();
+        }
     }
 
     public String summarize(String text) {
