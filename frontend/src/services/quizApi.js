@@ -20,4 +20,4 @@ export async function getQuizResult(quizId) {
   return requestApi(`/api/quizzes/${quizId}/result`, {
     method: "GET",
   });
-} //fix
+} //fixs
