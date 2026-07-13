@@ -24,7 +24,7 @@ export async function requestApi(endpoint, options = {}) {
       result?.message ||
       result?.error ||
       result ||
-      `요청에 실패했습니다. (${response.status})`;
+      `요청에 실패했습니다.  (${response.status})`;
 
     throw new Error(message);
   }
