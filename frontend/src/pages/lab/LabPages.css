@@ -421,6 +421,21 @@
   white-space: nowrap;
 }
 
+.selected-project .selected-project__language {
+  align-self: flex-start;
+  padding: 5px 9px;
+  overflow: visible;
+  color: #417847;
+  background: #e6f3e4;
+  border-radius: 999px;
+  text-overflow: clip;
+}
+
+.selected-project__language b {
+  margin-left: 4px;
+  color: #247231;
+}
+
 .selected-project small {
   color: #4f8052;
   font-size: 11px;
