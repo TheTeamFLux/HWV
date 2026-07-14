@@ -13,4 +13,5 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     long countByUser(User user);
 
     void deleteByUser(User user);
+
 }

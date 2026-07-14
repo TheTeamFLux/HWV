@@ -49,7 +49,11 @@ public class QuizService {
         return quizRepository.findByUser(user);
     }
 
-    public long getQuizCount(User user) {
+    public long getQuizCount(Long userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow();
+
         return quizRepository.countByUser(user);
     }
 }

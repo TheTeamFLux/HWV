@@ -135,4 +135,8 @@ public class GeminiService {
 
         return callGemini(prompt);
     }
+
+    public List<Quiz> generateQuiz(String summary) {
+        return new ArrayList<>();
+    }
 }
