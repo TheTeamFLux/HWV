@@ -152,6 +152,9 @@ function ProblemCreatePage() {
             <div className="selected-project">
               <div>
                 <strong>파일 선택 완료 · {files.length}개</strong>
+                <span className="selected-project__language">
+                  감지된 언어 <b>{language}</b>
+                </span>
                 <span>
                   {files
                     .slice(0, 4)

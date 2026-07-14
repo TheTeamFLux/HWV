@@ -38,7 +38,7 @@ function DashboardPage() {
     <div className="lab-page">
       <div className="lab-page__heading">
         <div>
-          <span className="lab-page__eyebrow">SUMQUIZ CODE LAB</span>
+          <span className="lab-page__eyebrow">HWV CODE LAB</span>
           <h1>
             안녕하세요{user?.name ? `, ${user.name}님` : ""}
           </h1>

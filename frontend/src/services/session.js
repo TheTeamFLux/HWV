@@ -1,5 +1,7 @@
 const SESSION_USER_KEY = "sumquiz-session-user";
 const REGISTERED_USERS_KEY = "sumquiz-registered-users";
+const USER_ID_KEY = "userId";
+const USER_NAME_KEY = "userName";
 
 function readJson(key, fallback) {
   try {
@@ -29,6 +31,7 @@ export function saveLoginUser(loginResult, email) {
   const savedUser = registeredUsers[normalizedEmail] || {};
 
   const user = {
+    id: userFromResponse.userId,
     name:
       userFromResponse.name ||
       userFromResponse.username ||
@@ -38,14 +41,37 @@ export function saveLoginUser(loginResult, email) {
     email: userFromResponse.email || savedUser.email || normalizedEmail,
   };
 
+  if (user.id != null) {
+    localStorage.setItem(USER_ID_KEY, String(user.id));
+  }
+  localStorage.setItem(USER_NAME_KEY, user.name);
   localStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
   return user;
 }
 
 export function getSessionUser() {
-  return readJson(SESSION_USER_KEY, null);
+  const sessionUser = readJson(SESSION_USER_KEY, null);
+
+  if (sessionUser) {
+    return sessionUser;
+  }
+
+  const userId = getUserId();
+  const name = localStorage.getItem(USER_NAME_KEY);
+
+  return userId || name ? { id: userId, name } : null;
+}
+
+export function getUserId() {
+  return Number(localStorage.getItem(USER_ID_KEY));
+}
+
+export function isLoggedIn() {
+  return getUserId() > 0;
 }
 
 export function clearSessionUser() {
   localStorage.removeItem(SESSION_USER_KEY);
+  localStorage.removeItem(USER_ID_KEY);
+  localStorage.removeItem(USER_NAME_KEY);
 }

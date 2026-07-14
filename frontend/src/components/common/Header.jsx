@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router";
 
+import { clearSessionUser } from "../../services/session";
 import Button from "./Button";
 import "./Header.css";
 
@@ -17,6 +18,7 @@ function Header({ simple = false }) {
 
     if (shouldLogout) {
       localStorage.removeItem("accessToken");
+      clearSessionUser();
       navigate("/login");
     }
   }
