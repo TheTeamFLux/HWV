@@ -66,46 +66,73 @@ public class GeminiService {
         }
     }
 
-    public String summarize(String text) {
+    public String analyzeCode(String code) {
 
-        String prompt =
-                "다음 내용을 핵심만 한국어로 요약해줘.\n\n"
-                        + text;
+        String prompt = """
+            다음 Java 코드를 분석해.
+
+            다음 형식(JSON)으로만 응답해.
+
+            {
+                "language":"Java",
+                "grammars":[
+                    {
+                    "name":"",
+                    "description":"",
+                    "importance":5
+                    }
+                ]
+            }
+
+            코드:
+
+            """ + code;
 
         return callGemini(prompt);
     }
 
-    public List<Quiz> generateQuiz(String summary) {
+    public String analyzeAndGenerate(String code) {
 
         String prompt = """
-    다음 요약을 보고 객관식 문제를 만들어.
+            다음 Java 코드를 분석해.
+            
+            해야 할 일
+            
+            1. 핵심 Java 문법 3개 추출
+            2. 각각 설명
+            3. 중요도(1~5)
+            4. 그 문법을 기반으로 객관식 문제 5개 생성
+            
+            JSON만 출력.
+            
+            형식
+            
+            {
+              "grammars":[
+                {
+                  "name":"",
+                  "description":"",
+                  "importance":5
+                }
+              ],
+              "quizzes":[
+                {
+                  "question":"",
+                  "option1":"",
+                  "option2":"",
+                  "option3":"",
+                  "option4":"",
+                  "option5":"",
+                  "answer":1,
+                  "explanation":""
+                }
+              ]
+            }
+            
+            코드:
+            
+            """ + code;
 
-    조건
-    - 문제는 반드시 5개
-    - 보기는 반드시 5개
-    - answer는 정답 번호(1~5)
-    - explanation도 작성
-    - JSON 배열만 출력
-
-    형식
-
-    [
-      {
-        "question":"",
-        "option1":"",
-        "option2":"",
-        "option3":"",
-        "option4":"",
-        "option5":"",
-        "answer":1,
-        "explanation":""
-      }
-    ]
-
-    요약:
-
-    """ + summary;
-
-        return List.of();
+        return callGemini(prompt);
     }
 }
