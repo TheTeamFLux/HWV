@@ -16,6 +16,7 @@ function ProblemWorkspacePage() {
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -34,6 +35,7 @@ function ProblemWorkspacePage() {
           setTests(result.tests);
         }
       })
+      .catch((error) => { if (active) setErrorMessage(error.message); })
       .finally(() => {
         if (active) {
           setIsLoading(false);
@@ -53,6 +55,7 @@ function ProblemWorkspacePage() {
     try {
       setIsSubmitting(true);
       setSubmissionResult(null);
+      setErrorMessage("");
 
       const result = await submitSolution({
         problemId: problem.id,
@@ -62,6 +65,8 @@ function ProblemWorkspacePage() {
 
       setTests(result.tests);
       setSubmissionResult(result);
+    } catch (error) {
+      setErrorMessage(error.message || "AI 코드 검토에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -153,7 +158,7 @@ function ProblemWorkspacePage() {
               disabled={isSubmitting}
               onClick={handleSubmit}
             >
-              {isSubmitting ? "테스트 실행 중..." : "제출하기"}
+              {isSubmitting ? "AI가 코드를 검토하고 있습니다..." : "AI 실행 검토"}
             </button>
 
             <button
@@ -173,9 +178,11 @@ function ProblemWorkspacePage() {
         <aside className="workspace-right">
           <TestCasePanel tests={tests} />
 
+          {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
+
           <section className="feedback-card">
             <div className="feedback-card__header">
-              <h2>실행 결과</h2>
+              <h2>AI 예상 결과</h2>
               {submissionResult && (
                 <span
                   className={
@@ -191,7 +198,7 @@ function ProblemWorkspacePage() {
 
             {!submissionResult ? (
               <div className="compact-empty">
-                코드를 제출하면 테스트 결과와 AI 피드백이 표시됩니다.
+                코드를 제출하면 실제 실행 없이 테스트별 예상 결과와 AI 피드백이 표시됩니다.
               </div>
             ) : (
               <>

@@ -1,33 +1,22 @@
 package com.example.backend.controller;
 
-import com.example.backend.entity.Quiz;
-import com.example.backend.service.GeminiService;
-import com.example.backend.service.QuizService;
+import com.example.backend.dto.*;
+import com.example.backend.service.ProblemGenerationService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
-@RequestMapping("/problem")
+@RequestMapping("/api")
 public class ProblemController {
+    private final ProblemGenerationService problemService;
+    public ProblemController(ProblemGenerationService problemService) { this.problemService = problemService; }
 
-    private final GeminiService geminiService;
-    private final QuizService quizService;
-
-    public ProblemController(GeminiService geminiService,
-                             QuizService quizService) {
-
-        this.geminiService = geminiService;
-        this.quizService = quizService;
-    }
-
-    @PostMapping("/generate")
-    public List<Quiz> generate(@RequestBody Map<String, Object> request) {
-
-        String code = (String) request.get("code");
-        Long userId = Long.valueOf(request.get("userId").toString());
-
-        return quizService.generateQuiz(code, userId);
-    }
+    @PostMapping("/projects/problems")
+    public List<Map<String, Object>> generate(@RequestBody CodingProblemRequest request) { return problemService.generate(request); }
+    @GetMapping("/problems")
+    public List<Map<String, Object>> problems(@RequestParam Long userId) { return problemService.findAll(userId); }
+    @GetMapping("/problems/{id}")
+    public Map<String, Object> problem(@PathVariable Long id, @RequestParam Long userId) { return problemService.findOne(id, userId); }
+    @PostMapping("/submissions")
+    public Map<String, Object> submit(@RequestBody CodingSubmissionRequest request) { return problemService.review(request); }
 }

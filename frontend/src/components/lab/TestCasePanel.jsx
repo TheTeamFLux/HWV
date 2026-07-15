@@ -1,7 +1,7 @@
 function TestCasePanel({ tests }) {
   return (
     <section className="test-card">
-      <h2>테스트 케이스</h2>
+      <h2>AI 예상 테스트 케이스</h2>
 
       <div className="test-list">
         {tests.map((test) => (
@@ -24,17 +24,13 @@ function TestCasePanel({ tests }) {
                       : "·"}
                 </b>
                 {test.status === "passed"
-                  ? "통과"
+                  ? "예상 통과"
                   : test.status === "failed"
-                    ? "실패"
+                    ? "예상 실패"
                     : "대기"}
               </span>
 
-              <small>
-                {test.runtime
-                  ? test.runtime + " / " + test.memory
-                  : "-"}
-              </small>
+              <small>{test.reason || "실제 실행 전"}</small>
             </div>
 
             {test.status === "failed" && (

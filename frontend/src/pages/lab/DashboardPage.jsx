@@ -7,6 +7,7 @@ import "./LabPages.css";
 
 function DashboardPage() {
   const [summary, setSummary] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const user = getSessionUser();
 
   useEffect(() => {
@@ -16,7 +17,7 @@ function DashboardPage() {
       if (active) {
         setSummary(result);
       }
-    });
+    }).catch((error) => { if (active) setErrorMessage(error.message); });
 
     return () => {
       active = false;
@@ -29,9 +30,9 @@ function DashboardPage() {
       value: summary?.generatedProblems ?? 0,
       unit: "개",
     },
-    { label: "정답", value: summary?.correctAnswers ?? 0, unit: "개" },
-    { label: "오답", value: summary?.incorrectAnswers ?? 0, unit: "개" },
-    { label: "퀴즈 정답률", value: summary?.accuracy ?? 0, unit: "%" },
+    { label: "AI 예상 성공", value: summary?.correctAnswers ?? 0, unit: "개" },
+    { label: "보완 필요", value: summary?.incorrectAnswers ?? 0, unit: "개" },
+    { label: "AI 예상 통과율", value: summary?.accuracy ?? 0, unit: "%" },
   ];
 
   return (
@@ -43,8 +44,7 @@ function DashboardPage() {
             안녕하세요{user?.name ? `, ${user.name}님` : ""}
           </h1>
           <p>
-            Java 파일을 업로드하면 AI가 핵심 문법을 분석하고 맞춤 퀴즈를
-            만들어 줍니다.
+            Java 파일의 핵심 문법 3개를 분석해 문법별 코딩 문제를 만들어 줍니다.
           </p>
         </div>
 
@@ -52,6 +52,8 @@ function DashboardPage() {
           ＋ 새 문제 만들기
         </Link>
       </div>
+
+      {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
 
       <section className="metric-grid">
         {cards.map((card) => (
@@ -115,11 +117,11 @@ function DashboardPage() {
             </li>
             <li>
               <b>3</b>
-              <span>분석 결과를 바탕으로 퀴즈 5개 생성</span>
+              <span>핵심 문법마다 코딩 문제 1개씩, 총 3개 생성</span>
             </li>
             <li>
               <b>4</b>
-              <span>퀴즈를 풀고 정답과 오답 확인</span>
+              <span>코드를 작성하고 AI 예상 테스트 및 피드백 확인</span>
             </li>
           </ol>
         </section>

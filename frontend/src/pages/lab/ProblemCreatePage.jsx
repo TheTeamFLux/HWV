@@ -1,10 +1,8 @@
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
-import {
-  analyzeJavaFile,
-  createJavaQuiz,
-} from "../../services/javaLearningApi";
+import { analyzeJavaFile } from "../../services/javaLearningApi";
+import { createProblemsFromAnalysis } from "../../services/problemApi";
 import "./LabPages.css";
 
 function ProblemCreatePage() {
@@ -58,7 +56,7 @@ function ProblemCreatePage() {
     }
   }
 
-  async function handleCreateQuiz() {
+  async function handleCreateProblems() {
     if (!analysis) {
       setErrorMessage("Java 파일 분석을 먼저 완료해 주세요.");
       return;
@@ -67,8 +65,8 @@ function ProblemCreatePage() {
     try {
       setIsCreating(true);
       setErrorMessage("");
-      const questions = await createJavaQuiz(analysis);
-      navigate("/quiz", { state: { questions } });
+      await createProblemsFromAnalysis(analysis);
+      navigate("/problems");
     } catch (error) {
       setErrorMessage(error.message || "문제를 생성하지 못했습니다.");
     } finally {
@@ -83,8 +81,8 @@ function ProblemCreatePage() {
           <span className="lab-page__eyebrow">JAVA AI LEARNING</span>
           <h1>Java 파일 분석</h1>
           <p>
-            Java 파일을 업로드하면 AI가 핵심 문법 3개를 분석하고 맞춤 문제
-            5개를 만듭니다.
+            Java 파일을 업로드하면 AI가 핵심 문법 3개를 분석하고 문법별 코딩 문제
+            3개를 만듭니다.
           </p>
         </div>
       </div>
@@ -192,9 +190,9 @@ function ProblemCreatePage() {
               type="button"
               className="creation-submit"
               disabled={isCreating}
-              onClick={handleCreateQuiz}
+              onClick={handleCreateProblems}
             >
-              {isCreating ? "AI가 문제 5개를 만들고 있습니다..." : "문제 5개 생성하기"}
+              {isCreating ? "AI가 코딩 문제 3개를 만들고 있습니다..." : "문법별 코딩 문제 3개 생성하기"}
             </button>
           </section>
         )}

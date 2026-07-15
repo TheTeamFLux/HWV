@@ -1,6 +1,6 @@
 import { getUserId } from "./session";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://sumquiz.onrender.com";
 
 function normalizeQuestions(result) {
   const questions = Array.isArray(result) ? result : result?.questions || result?.quizzes || [];

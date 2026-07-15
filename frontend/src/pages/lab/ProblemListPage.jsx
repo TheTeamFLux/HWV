@@ -7,15 +7,15 @@ import "./LabPages.css";
 function ProblemListPage() {
   const [problems, setProblems] = useState([]);
   const [category, setCategory] = useState("전체");
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let active = true;
 
-    getProblems().then((result) => {
-      if (active) {
-        setProblems(result);
-      }
-    });
+    getProblems().then((result) => { if (active) setProblems(result); })
+      .catch((error) => { if (active) setErrorMessage(error.message); })
+      .finally(() => { if (active) setIsLoading(false); });
 
     return () => {
       active = false;
@@ -34,7 +34,7 @@ function ProblemListPage() {
         <div>
           <span className="lab-page__eyebrow">AI GENERATED PROBLEMS</span>
           <h1>AI 문제</h1>
-          <p>업로드한 코드나 PDF 내용을 바탕으로 생성된 문제입니다.</p>
+          <p>업로드한 Java 코드의 핵심 문법마다 생성된 AI 코딩 문제입니다.</p>
         </div>
         <Link className="lab-primary-link" to="/problems/new">
           ＋ 새 문제 만들기
@@ -60,7 +60,11 @@ function ProblemListPage() {
         </div>
       )}
 
-      {visibleProblems.length ? (
+      {isLoading ? (
+        <section className="large-empty">문제 목록을 불러오고 있습니다...</section>
+      ) : errorMessage ? (
+        <p className="form-error" role="alert">{errorMessage}</p>
+      ) : visibleProblems.length ? (
         <section className="problem-grid">
           {visibleProblems.map((problem) => (
           <Link
@@ -98,8 +102,7 @@ function ProblemListPage() {
         <section className="large-empty">
           <strong>아직 생성된 문제가 없습니다.</strong>
           <span>
-            소스 코드, PDF 또는 프로젝트 폴더를 업로드해 첫 문제를 만들어
-            보세요.
+            Java 파일을 업로드해 문법별 코딩 문제 3개를 만들어 보세요.
           </span>
           <Link className="lab-primary-link" to="/problems/new">
             ＋ AI 문제 만들기

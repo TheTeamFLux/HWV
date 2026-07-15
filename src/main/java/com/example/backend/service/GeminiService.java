@@ -1,6 +1,8 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.JavaAnalysisResponse;
+import com.example.backend.dto.CodingProblemDraft;
+import com.example.backend.dto.CodingReviewResponse;
 import com.example.backend.entity.Quiz;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,4 +108,66 @@ public class GeminiService {
 
     public String analyzeAndGenerate(String code) { return callGemini(code); }
     public String summarize(String text) { return callGemini("다음 내용을 한국어 JSON으로 요약해줘: " + text); }
+
+    public List<CodingProblemDraft> generateCodingProblems(String code) {
+        List<JavaSyntaxDetector.Detected> detected = syntaxDetector.detect(code);
+        String prompt = """
+            아래 Java 코드에서 서버가 검증한 핵심 문법 3개 각각에 대해 프로그래머스 형식의 코딩 문제를 정확히 1개씩 생성하라.
+            따라서 문제는 정확히 3개이며, 각 grammarName은 탐지 목록의 이름을 한 번씩 그대로 사용한다.
+            원본 코드를 복사하거나 원본 변수명을 묻지 말고, 해당 문법을 실제로 활용해야 해결 가능한 새로운 문제를 만든다.
+            각 문제에는 서로 다른 입력을 가진 테스트케이스를 정확히 3개 만든다.
+            실제 실행기는 없으므로 입력과 기대 출력은 AI 논리 검토가 가능한 간결한 문자열로 작성한다.
+            JSON 형식:
+            {"problems":[{"grammarName":"","title":"","description":"","requirements":[""],
+            "inputExample":"","outputExample":"","starterCode":"class Solution { ... }","difficulty":"쉬움|보통|어려움",
+            "tests":[{"id":1,"name":"기본 케이스","input":"","expected":""}]}]}
+            탐지 목록: %s
+            참고할 Java 코드: %s
+            """.formatted(objectMapper.valueToTree(detected), code);
+        try {
+            JsonNode problems = objectMapper.readTree(callGemini(prompt)).path("problems");
+            if (problems.size() != 3) throw new IllegalStateException("Gemini가 문법별 문제 3개를 반환하지 않았습니다.");
+            Set<String> allowed = new LinkedHashSet<>(); detected.forEach(item -> allowed.add(item.name()));
+            Set<String> used = new HashSet<>(); List<CodingProblemDraft> result = new ArrayList<>();
+            for (JsonNode node : problems) {
+                String grammar = node.path("grammarName").asText();
+                if (!allowed.contains(grammar) || !used.add(grammar)) throw new IllegalStateException("문법별 문제 생성 규칙을 지키지 못했습니다.");
+                List<String> requirements = new ArrayList<>(); node.path("requirements").forEach(item -> requirements.add(item.asText()));
+                List<CodingProblemDraft.TestCase> tests = new ArrayList<>();
+                node.path("tests").forEach(test -> tests.add(new CodingProblemDraft.TestCase(test.path("id").asInt(), test.path("name").asText(), test.path("input").asText(), test.path("expected").asText())));
+                if (tests.size() != 3) throw new IllegalStateException("각 문제에는 테스트케이스 3개가 필요합니다.");
+                result.add(new CodingProblemDraft(grammar, node.path("title").asText(), node.path("description").asText(), requirements,
+                    node.path("inputExample").asText(), node.path("outputExample").asText(), node.path("starterCode").asText(),
+                    node.path("difficulty").asText("보통"), tests));
+            }
+            if (!used.equals(allowed)) throw new IllegalStateException("핵심 문법 3개가 모두 문제로 생성되지 않았습니다.");
+            return result;
+        } catch (Exception e) {
+            if (e instanceof IllegalStateException state) throw state;
+            throw new IllegalStateException("Gemini 코딩 문제 결과를 처리하지 못했습니다.", e);
+        }
+    }
+
+    public CodingReviewResponse reviewSolution(CodingProblemDraft problem, String sourceCode) {
+        String prompt = """
+            실제 코드를 실행하지 말고 Java 소스의 논리만 검토하라. 아래 문제와 테스트케이스 3개에 대해 예상 통과 여부를 판단한다.
+            컴파일 불가능, TODO 유지, 핵심 문법 미사용, 요구사항 누락은 실패로 판단한다.
+            정답 코드를 직접 제공하지 말고 실패 원인과 다음 수정 방향을 한국어로 설명한다.
+            JSON 형식: {"status":"passed|failed","hint":"","improvement":"",
+            "tests":[{"id":1,"name":"","status":"passed|failed","input":"","expected":"","actual":"AI 예상 결과","reason":"판단 근거"}]}
+            문제: %s
+            제출 코드: %s
+            """.formatted(objectMapper.valueToTree(problem), sourceCode);
+        try {
+            JsonNode root = objectMapper.readTree(callGemini(prompt)); List<CodingReviewResponse.TestResult> tests = new ArrayList<>();
+            root.path("tests").forEach(test -> tests.add(new CodingReviewResponse.TestResult(test.path("id").asInt(), test.path("name").asText(),
+                test.path("status").asText(), test.path("input").asText(), test.path("expected").asText(), test.path("actual").asText(), test.path("reason").asText())));
+            if (tests.size() != 3) throw new IllegalStateException("AI 검토 결과에 테스트 3개가 필요합니다.");
+            boolean allPassed = tests.stream().allMatch(test -> "passed".equals(test.status()));
+            return new CodingReviewResponse(allPassed ? "passed" : "failed", root.path("hint").asText(), root.path("improvement").asText(), tests);
+        } catch (Exception e) {
+            if (e instanceof IllegalStateException state) throw state;
+            throw new IllegalStateException("Gemini 코드 검토 결과를 처리하지 못했습니다.", e);
+        }
+    }
 }

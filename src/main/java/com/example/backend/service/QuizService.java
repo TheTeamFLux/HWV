@@ -15,11 +15,15 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
+    private final CodingProblemRepository codingProblemRepository;
+    private final CodingSubmissionRepository codingSubmissionRepository;
 
     public QuizService(GeminiService geminiService, QuizRepository quizRepository,
-                       QuizAttemptRepository attemptRepository, UserRepository userRepository) {
+                       QuizAttemptRepository attemptRepository, UserRepository userRepository,
+                       CodingProblemRepository codingProblemRepository, CodingSubmissionRepository codingSubmissionRepository) {
         this.geminiService = geminiService; this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository; this.userRepository = userRepository;
+        this.codingProblemRepository = codingProblemRepository; this.codingSubmissionRepository = codingSubmissionRepository;
     }
 
     @Transactional
@@ -52,28 +56,42 @@ public class QuizService {
     }
 
     public Map<String, Object> dashboard(Long userId) {
-        User user = user(userId); long generated = quizRepository.countByUser(user);
-        long correct = attemptRepository.countByUserAndCorrect(user, true), wrong = attemptRepository.countByUserAndCorrect(user, false);
+        User user = user(userId); long generated = quizRepository.countByUser(user) + codingProblemRepository.countByUser(user);
+        long correct = attemptRepository.countByUserAndCorrect(user, true) + codingSubmissionRepository.countByUserAndPassed(user, true);
+        long wrong = attemptRepository.countByUserAndCorrect(user, false) + codingSubmissionRepository.countByUserAndPassed(user, false);
         long total = correct + wrong;
-        List<Map<String, Object>> recent = attemptRepository.findByUserOrderByAnsweredAtDesc(user).stream().limit(4).map(this::attemptMap).toList();
+        List<Map<String, Object>> codingRecent = codingSubmissionRepository.findByUserOrderBySubmittedAtDesc(user).stream().limit(4).map(this::codingAttemptMap).toList();
+        List<Map<String, Object>> recent = codingRecent.isEmpty()
+            ? attemptRepository.findByUserOrderByAnsweredAtDesc(user).stream().limit(4).map(this::attemptMap).toList() : codingRecent;
         Map<String, Object> result = new LinkedHashMap<>(); result.put("generatedProblems", generated); result.put("correctAnswers", correct);
         result.put("incorrectAnswers", wrong); result.put("accuracy", total == 0 ? 0 : Math.round(correct * 100.0 / total)); result.put("recentAttempts", recent);
         return result;
     }
 
     public List<Map<String, Object>> wrongNotes(Long userId) {
-        return attemptRepository.findByUserOrderByAnsweredAtDesc(user(userId)).stream().filter(a -> !a.isCorrect()).map(this::attemptMap).toList();
+        User user = user(userId);
+        List<Map<String, Object>> coding = codingSubmissionRepository.findByUserOrderBySubmittedAtDesc(user).stream()
+            .filter(item -> !item.isPassed()).map(this::codingAttemptMap).toList();
+        return coding.isEmpty() ? attemptRepository.findByUserOrderByAnsweredAtDesc(user).stream().filter(a -> !a.isCorrect()).map(this::attemptMap).toList() : coding;
     }
 
     public Map<String, Object> statistics(Long userId) {
         User user = user(userId); Map<String, Object> result = new LinkedHashMap<>(dashboard(userId));
         List<QuizAttempt> attempts = attemptRepository.findByUserOrderByAnsweredAtDesc(user);
-        Map<String, List<QuizAttempt>> byGrammar = attempts.stream().collect(Collectors.groupingBy(a -> a.getQuiz().getGrammarName()));
-        result.put("categoryAccuracy", byGrammar.entrySet().stream().map(e -> Map.of("name", e.getKey(), "value",
-            Math.round(e.getValue().stream().filter(QuizAttempt::isCorrect).count() * 100.0 / e.getValue().size()))).toList());
+        List<CodingSubmission> codingAttempts = codingSubmissionRepository.findByUserOrderBySubmittedAtDesc(user);
+        Map<String, List<CodingSubmission>> codingByGrammar = codingAttempts.stream().collect(Collectors.groupingBy(a -> a.getProblem().getGrammarName()));
+        if (!codingByGrammar.isEmpty()) result.put("categoryAccuracy", codingByGrammar.entrySet().stream().map(e -> Map.of("name", e.getKey(), "value",
+            Math.round(e.getValue().stream().filter(CodingSubmission::isPassed).count() * 100.0 / e.getValue().size()))).toList());
+        else {
+            Map<String, List<QuizAttempt>> byGrammar = attempts.stream().collect(Collectors.groupingBy(a -> a.getQuiz().getGrammarName()));
+            result.put("categoryAccuracy", byGrammar.entrySet().stream().map(e -> Map.of("name", e.getKey(), "value",
+                Math.round(e.getValue().stream().filter(QuizAttempt::isCorrect).count() * 100.0 / e.getValue().size()))).toList());
+        }
         List<Long> weekly = new ArrayList<>(); LocalDate today = LocalDate.now();
         for (int i = 6; i >= 0; i--) { LocalDate day = today.minusDays(i); LocalDateTime start = day.atStartOfDay(), end = day.plusDays(1).atStartOfDay();
-            weekly.add(attempts.stream().filter(a -> !a.getAnsweredAt().isBefore(start) && a.getAnsweredAt().isBefore(end)).count()); }
+            weekly.add(codingAttempts.isEmpty()
+                ? attempts.stream().filter(a -> !a.getAnsweredAt().isBefore(start) && a.getAnsweredAt().isBefore(end)).count()
+                : codingAttempts.stream().filter(a -> !a.getSubmittedAt().isBefore(start) && a.getSubmittedAt().isBefore(end)).count()); }
         result.put("weeklyAttempts", weekly); return result;
     }
 
@@ -85,6 +103,13 @@ public class QuizService {
         result.put("correctAnswer", a.getQuiz().getAnswer()); result.put("explanation", a.getQuiz().getExplanation());
         result.put("submittedAt", a.getAnsweredAt().toString()); result.put("passedCount", a.isCorrect() ? 1 : 0);
         result.put("totalCount", 1); result.put("passed", a.isCorrect());
+        return result;
+    }
+    private Map<String, Object> codingAttemptMap(CodingSubmission item) {
+        Map<String, Object> result = new LinkedHashMap<>(); result.put("id", item.getId()); result.put("problemId", item.getProblem().getId());
+        result.put("problemTitle", item.getProblem().getTitle()); result.put("grammarName", item.getProblem().getGrammarName());
+        result.put("passedCount", item.getPassedCount()); result.put("totalCount", item.getTotalCount()); result.put("passed", item.isPassed());
+        result.put("hint", item.getHint()); result.put("explanation", item.getImprovement()); result.put("submittedAt", item.getSubmittedAt().toString());
         return result;
     }
     private User user(Long id) { return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다.")); }

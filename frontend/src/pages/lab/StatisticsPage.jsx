@@ -33,7 +33,7 @@ function StatisticsPage() {
         <div>
           <span className="lab-page__eyebrow">LEARNING REPORT</span>
           <h1>학습 통계</h1>
-          <p>문제 풀이 기록과 테스트 통과율을 한눈에 확인하세요.</p>
+          <p>AI 코딩 문제 생성과 예상 테스트 통과 기록을 확인하세요.</p>
         </div>
       </div>
 
@@ -45,13 +45,13 @@ function StatisticsPage() {
           </strong>
         </article>
         <article className="metric-card">
-          <span>정답</span>
+          <span>AI 예상 성공</span>
           <strong>
             {correctAnswers}<small>개</small>
           </strong>
         </article>
         <article className="metric-card">
-          <span>오답</span>
+          <span>보완 필요</span>
           <strong>
             {incorrectAnswers}<small>개</small>
           </strong>
@@ -60,7 +60,7 @@ function StatisticsPage() {
 
       <div className="statistics-grid">
         <section className="surface-card accuracy-card">
-          <h2>전체 테스트 정답률</h2>
+          <h2>전체 AI 예상 통과율</h2>
           <div
             className="accuracy-ring"
             style={{
@@ -72,11 +72,11 @@ function StatisticsPage() {
               <span>정답률</span>
             </div>
           </div>
-          <p>퀴즈 응답 {answerCount}개 기준</p>
+          <p>AI 코드 검토 {answerCount}회 기준</p>
         </section>
 
         <section className="surface-card category-chart">
-          <h2>영역별 정답률</h2>
+          <h2>문법별 예상 통과율</h2>
           {statistics?.categoryAccuracy?.length ? (
             <div>
               {statistics.categoryAccuracy.map((item) => (
