@@ -4,6 +4,7 @@ public class GenerateQuizRequest {
 
     private String summary;
     private Long userId;
+    private String code;
 
     public GenerateQuizRequest() {
     }
@@ -23,4 +24,6 @@ public class GenerateQuizRequest {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
 }

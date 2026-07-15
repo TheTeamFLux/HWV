@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router";
 
 import Button from "../components/common/Button";
 import {
@@ -9,11 +9,18 @@ import {
 import "./lab/LabPages.css";
 
 function QuizPage() {
-  const [questions] = useState(() => getCurrentJavaQuiz());
+  const location = useLocation();
+  const [questions, setQuestions] = useState(location.state?.questions || []);
+  const [isLoading, setIsLoading] = useState(questions.length === 0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (questions.length) return;
+    getCurrentJavaQuiz().then(setQuestions).catch((error) => setErrorMessage(error.message)).finally(() => setIsLoading(false));
+  }, [questions.length]);
 
   function handleAnswerChange(questionId, answer) {
     setSelectedAnswers((previousAnswers) => ({
@@ -40,6 +47,8 @@ function QuizPage() {
       setIsSubmitting(false);
     }
   }
+
+  if (isLoading) return <div className="lab-page lab-page--narrow"><section className="large-empty">문제를 불러오고 있습니다...</section></div>;
 
   if (questions.length === 0) {
     return (
@@ -74,14 +83,14 @@ function QuizPage() {
             <h2>{question.question}</h2>
 
             <div className="java-quiz-options">
-              {question.options.map((option) => (
+              {question.options.map((option, optionIndex) => (
                 <label key={option}>
                   <input
                     type="radio"
                     name={`quiz-answer-${question.id}`}
-                    value={option}
-                    checked={selectedAnswers[question.id] === option}
-                    onChange={() => handleAnswerChange(question.id, option)}
+                    value={optionIndex + 1}
+                    checked={selectedAnswers[question.id] === optionIndex + 1}
+                    onChange={() => handleAnswerChange(question.id, optionIndex + 1)}
                   />
                   <span>{option}</span>
                 </label>
@@ -110,6 +119,9 @@ function QuizPage() {
             정답 <b>{result.correctCount}개</b> · 오답{" "}
             <b>{result.wrongCount}개</b>
           </p>
+          {result.wrongAnswers?.map((wrong) => (
+            <p key={wrong.quizId}><b>{wrong.grammarName}</b>: {wrong.explanation}</p>
+          ))}
         </section>
       )}
     </div>

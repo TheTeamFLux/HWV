@@ -67,8 +67,8 @@ function ProblemCreatePage() {
     try {
       setIsCreating(true);
       setErrorMessage("");
-      await createJavaQuiz(analysis);
-      navigate("/quiz");
+      const questions = await createJavaQuiz(analysis);
+      navigate("/quiz", { state: { questions } });
     } catch (error) {
       setErrorMessage(error.message || "문제를 생성하지 못했습니다.");
     } finally {

@@ -1,9 +1,8 @@
-import { getLocalJavaQuizStatistics } from "./javaLearningApi";
 import { getUserId } from "./session";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
+const USE_MOCK_API = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_API === "true";
 const PROBLEM_STORAGE_KEY = "sumquiz-generated-problems-v2";
 const ATTEMPT_STORAGE_KEY = "sumquiz-code-attempts-v2";
 
@@ -287,84 +286,13 @@ export async function submitSolution({ problemId, language, sourceCode }) {
 }
 
 export async function getDashboardSummary() {
-  if (!USE_MOCK_API) {
-    return request(`/api/me/dashboard?userId=${getUserId()}`);
-  }
-
-  await wait(180);
-  const problems = getMockProblems();
-  const attempts = getMockAttempts();
-  const solvedProblemIds = new Set(
-    attempts.filter((attempt) => attempt.passed).map((attempt) => attempt.problemId),
-  );
-  const totalTests = attempts.reduce(
-    (sum, attempt) => sum + attempt.totalCount,
-    0,
-  );
-  const passedTests = attempts.reduce(
-    (sum, attempt) => sum + attempt.passedCount,
-    0,
-  );
-  const javaQuizStatistics = getLocalJavaQuizStatistics();
-  const javaAnswerTotal =
-    javaQuizStatistics.correctAnswers + javaQuizStatistics.incorrectAnswers;
-
-  return {
-    generatedProblems:
-      problems.length + javaQuizStatistics.generatedProblems,
-    attempts: attempts.length,
-    solvedProblems: solvedProblemIds.size,
-    correctAnswers: javaQuizStatistics.correctAnswers,
-    incorrectAnswers: javaQuizStatistics.incorrectAnswers,
-    accuracy: javaAnswerTotal
-      ? Math.round((javaQuizStatistics.correctAnswers / javaAnswerTotal) * 100)
-      : totalTests
-        ? Math.round((passedTests / totalTests) * 100)
-        : 0,
-    recentAttempts: attempts.slice(0, 4),
-  };
+  return request(`/api/me/dashboard?userId=${getUserId()}`);
 }
 
 export async function getWrongNotes() {
-  if (!USE_MOCK_API) {
-    return request(`/api/me/wrong-notes?userId=${getUserId()}`);
-  }
-
-  await wait(180);
-  return getMockAttempts().filter((attempt) => !attempt.passed);
+  return request(`/api/me/wrong-notes?userId=${getUserId()}`);
 }
 
 export async function getLearningStatistics() {
-  if (!USE_MOCK_API) {
-    return request(`/api/me/statistics?userId=${getUserId()}`);
-  }
-
-  const summary = await getDashboardSummary();
-  const attempts = getMockAttempts();
-  const categoryMap = attempts.reduce((map, attempt) => {
-    const category = attempt.category || "기타";
-    const current = map[category] || { passed: 0, total: 0 };
-    current.passed += attempt.passedCount;
-    current.total += attempt.totalCount;
-    map[category] = current;
-    return map;
-  }, {});
-  const today = new Date();
-  const weeklyAttempts = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (6 - index));
-    return attempts.filter((attempt) => {
-      const attemptDate = new Date(attempt.submittedAt);
-      return attemptDate.toDateString() === date.toDateString();
-    }).length;
-  });
-
-  return {
-    ...summary,
-    categoryAccuracy: Object.entries(categoryMap).map(([name, value]) => ({
-      name,
-      value: value.total ? Math.round((value.passed / value.total) * 100) : 0,
-    })),
-    weeklyAttempts,
-  };
+  return request(`/api/me/statistics?userId=${getUserId()}`);
 }

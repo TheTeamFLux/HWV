@@ -29,11 +29,18 @@ public class Quiz {
 
     private int answer;
 
+    @Column(nullable = false, length = 100)
+    private String grammarName;
+
+    @Column(nullable = false)
+    private java.time.LocalDateTime createdAt = java.time.LocalDateTime.now();
+
     @Lob
     private String explanation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private User user;
 
     public Quiz() {}
@@ -113,4 +120,8 @@ public class Quiz {
     public void setExplanation(String explanation) {
         this.explanation = explanation;
     }
+
+    public String getGrammarName() { return grammarName; }
+    public void setGrammarName(String grammarName) { this.grammarName = grammarName; }
+    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
 }

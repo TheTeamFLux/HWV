@@ -14,4 +14,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
     void deleteByUser(User user);
 
+    List<Quiz> findTop5ByUserOrderByCreatedAtDescIdDesc(User user);
+
 }
