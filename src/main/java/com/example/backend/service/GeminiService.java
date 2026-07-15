@@ -106,8 +106,12 @@ public class GeminiService {
         }
     }
 
-    public String analyzeAndGenerate(String code) { return callGemini(code); }
-    public String summarize(String text) { return callGemini("다음 내용을 한국어 JSON으로 요약해줘: " + text); }
+    public String analyzeAndGenerate(String code) {
+        return callGemini(code);
+    }
+    public String summarize(String text) {
+        return callGemini("다음 내용을 한국어 JSON으로 요약해줘: " + text);
+    }
 
     public List<CodingProblemDraft> generateCodingProblems(String code) {
         List<JavaSyntaxDetector.Detected> detected = syntaxDetector.detect(code);
