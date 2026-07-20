@@ -71,6 +71,7 @@ export function isLoggedIn() {
 }
 
 export function clearSessionUser() {
+  window.google?.accounts.id.disableAutoSelect();
   localStorage.removeItem(SESSION_USER_KEY);
   localStorage.removeItem(USER_ID_KEY);
   localStorage.removeItem(USER_NAME_KEY);

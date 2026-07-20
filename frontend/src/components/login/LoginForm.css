@@ -116,14 +116,12 @@
   background-color: var(--color-white);
   border: 1px solid #dcdcdc;
   border-radius: var(--radius-small);
+  overflow: hidden;
 }
 
-.login-form__google:hover {
-  background-color: #f7f7f7;
-}
-
-.login-form__google-icon {
-  font-weight: 900;
+.login-form__google > div,
+.login-form__google iframe {
+  max-width: 100%;
 }
 
 .login-form__signup {

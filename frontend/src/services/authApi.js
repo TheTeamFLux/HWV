@@ -16,3 +16,10 @@ export async function signupUser(userData) {
     body: JSON.stringify(userData),
   });
 }
+
+export async function loginWithGoogle(credential) {
+  return requestApi("/users/google", {
+    method: "POST",
+    body: JSON.stringify({ credential }),
+  });
+}

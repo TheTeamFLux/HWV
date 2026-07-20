@@ -1,5 +1,5 @@
-import { loginUser } from "../../services/authApi";
-import { useState } from "react";
+import { loginUser, loginWithGoogle } from "../../services/authApi";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import Button from "../common/Button";
@@ -8,6 +8,7 @@ import "./LoginForm.css";
 
 function LoginForm() {
   const navigate = useNavigate();
+  const googleButtonRef = useRef(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -17,6 +18,56 @@ function LoginForm() {
 
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return undefined;
+
+    let attempts = 0;
+    const initializeGoogleButton = () => {
+      if (!window.google?.accounts.id || !googleButtonRef.current) {
+        attempts += 1;
+        if (attempts >= 100) {
+          window.clearInterval(timerId);
+          setErrorMessage("Google 로그인 버튼을 불러오지 못했습니다.");
+        }
+        return;
+      }
+
+      window.clearInterval(timerId);
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          try {
+            setIsLoggingIn(true);
+            setErrorMessage("");
+            const result = await loginWithGoogle(response.credential);
+            saveLoginUser(result, result.email);
+            navigate("/home");
+          } catch (error) {
+            setErrorMessage(
+              error.message || "Google 로그인에 실패했습니다. 다시 시도해 주세요.",
+            );
+          } finally {
+            setIsLoggingIn(false);
+          }
+        },
+      });
+      googleButtonRef.current.replaceChildren();
+      window.google.accounts.id.renderButton(googleButtonRef.current, {
+        type: "standard",
+        theme: "outline",
+        size: "large",
+        shape: "rectangular",
+        text: "signin_with",
+        width: 330,
+      });
+    };
+
+    const timerId = window.setInterval(initializeGoogleButton, 100);
+    initializeGoogleButton();
+    return () => window.clearInterval(timerId);
+  }, [navigate]);
 
   function handleInputChange(event) {
     const { name, value, type, checked } = event.target;
@@ -65,10 +116,6 @@ function LoginForm() {
     } finally {
       setIsLoggingIn(false);
     }
-  }
-
-  function handleGoogleLogin() {
-    alert("공사중");
   }
 
   return (
@@ -139,14 +186,11 @@ function LoginForm() {
         <span>또는</span>
       </div>
 
-      <button
-        className="login-form__google"
-        type="button"
-        onClick={handleGoogleLogin}
-      >
-        <span className="login-form__google-icon">G</span>
-        Google로 로그인
-      </button>
+      <div className="login-form__google" ref={googleButtonRef}>
+        {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+          <span>Google 로그인 설정이 필요합니다.</span>
+        )}
+      </div>
 
       <p className="login-form__signup">
         아직 계정이 없으신가요?
