@@ -15,7 +15,7 @@ public class JavaAnalysisController {
 
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public JavaAnalysisResponse analyze(@RequestPart("file") MultipartFile file,
-                                        @RequestPart("userId") Long userId) throws Exception {
+                                        @RequestParam("userId") Long userId) throws Exception {
         if (file.isEmpty() || file.getOriginalFilename() == null || !file.getOriginalFilename().toLowerCase().endsWith(".java")) {
             throw new IllegalArgumentException(".java 파일만 업로드할 수 있습니다.");
         }

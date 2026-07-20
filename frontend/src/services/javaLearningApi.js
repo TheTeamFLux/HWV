@@ -17,13 +17,13 @@ function normalizeQuestions(result) {
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") || "";
   const result = contentType.includes("application/json") ? await response.json() : await response.text();
-  if (!response.ok) throw new Error(result?.message || result?.error || result || `요청에 실패했습니다. (${response.status})`);
+  if (!response.ok) throw new Error(result?.message || result?.detail || result?.error || result || `요청에 실패했습니다. (${response.status})`);
   return result;
 }
 
 export async function analyzeJavaFile(file) {
   const userId = getUserId();
-  if (!userId) throw new Error("로그인 후 Java 파일을 분석해 주세요.");
+  if (!Number.isInteger(userId) || userId <= 0) throw new Error("로그인 후 Java 파일을 분석해 주세요.");
   const formData = new FormData();
   formData.append("file", file);
   formData.append("userId", String(userId));
