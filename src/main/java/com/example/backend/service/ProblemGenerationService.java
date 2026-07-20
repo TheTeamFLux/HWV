@@ -25,9 +25,7 @@ public class ProblemGenerationService {
 
     @Transactional
     public List<Map<String, Object>> generate(CodingProblemRequest request) {
-        User user = user(request.getUserId());
-        List<CodingProblem> saved = geminiService.generateCodingProblems(request.getCode()).stream().map(draft -> toEntity(user, draft)).toList();
-        return problemRepository.saveAll(saved).stream().map(problem -> response(problem, false)).toList();
+        return findAll(request.getUserId()).stream().limit(3).toList();
     }
 
     @Transactional(readOnly = true)
@@ -64,13 +62,6 @@ public class ProblemGenerationService {
         map.put("passedCount", item.getPassedCount()); map.put("totalCount", item.getTotalCount()); map.put("passed", item.isPassed());
         map.put("hint", item.getHint()); map.put("improvement", item.getImprovement()); map.put("submittedAt", item.getSubmittedAt().toString());
         return map;
-    }
-
-    private CodingProblem toEntity(User user, CodingProblemDraft draft) {
-        CodingProblem problem = new CodingProblem(); problem.setUser(user); problem.setGrammarName(draft.grammarName()); problem.setTitle(draft.title());
-        problem.setDescription(draft.description()); problem.setRequirementsJson(write(draft.requirements())); problem.setInputExample(draft.inputExample());
-        problem.setOutputExample(draft.outputExample()); problem.setStarterCode(draft.starterCode()); problem.setDifficulty(draft.difficulty());
-        problem.setTestsJson(write(draft.tests())); return problem;
     }
 
     private CodingProblemDraft toDraft(CodingProblem problem) {

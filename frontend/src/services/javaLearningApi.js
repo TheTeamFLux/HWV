@@ -22,8 +22,11 @@ async function parseResponse(response) {
 }
 
 export async function analyzeJavaFile(file) {
+  const userId = getUserId();
+  if (!userId) throw new Error("로그인 후 Java 파일을 분석해 주세요.");
   const formData = new FormData();
   formData.append("file", file);
+  formData.append("userId", String(userId));
   const result = await parseResponse(await fetch(`${API_BASE_URL}/java/analyze`, { method: "POST", body: formData }));
   if (result?.grammars?.length !== 3) throw new Error("AI 분석 결과에 핵심 문법 3개가 필요합니다.");
   return result;

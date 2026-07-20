@@ -11,27 +11,23 @@ import java.util.stream.Collectors;
 
 @Service
 public class QuizService {
-    private final GeminiService geminiService;
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
     private final CodingProblemRepository codingProblemRepository;
     private final CodingSubmissionRepository codingSubmissionRepository;
 
-    public QuizService(GeminiService geminiService, QuizRepository quizRepository,
+    public QuizService(QuizRepository quizRepository,
                        QuizAttemptRepository attemptRepository, UserRepository userRepository,
                        CodingProblemRepository codingProblemRepository, CodingSubmissionRepository codingSubmissionRepository) {
-        this.geminiService = geminiService; this.quizRepository = quizRepository;
+        this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository; this.userRepository = userRepository;
         this.codingProblemRepository = codingProblemRepository; this.codingSubmissionRepository = codingSubmissionRepository;
     }
 
     @Transactional
     public List<Quiz> generateQuiz(String code, Long userId) {
-        User user = user(userId);
-        List<Quiz> quizzes = geminiService.generateQuiz(code);
-        quizzes.forEach(quiz -> quiz.setUser(user));
-        return quizRepository.saveAll(quizzes);
+        return getLatestQuiz(userId);
     }
 
     public List<Quiz> getLatestQuiz(Long userId) { return quizRepository.findTop5ByUserOrderByCreatedAtDescIdDesc(user(userId)); }

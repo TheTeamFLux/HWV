@@ -2,7 +2,6 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 import { analyzeJavaFile } from "../../services/javaLearningApi";
-import { createProblemsFromAnalysis } from "../../services/problemApi";
 import "./LabPages.css";
 
 function ProblemCreatePage() {
@@ -12,7 +11,6 @@ function ProblemCreatePage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   function selectJavaFile(fileList) {
@@ -56,22 +54,12 @@ function ProblemCreatePage() {
     }
   }
 
-  async function handleCreateProblems() {
+  function handleCreateProblems() {
     if (!analysis) {
       setErrorMessage("Java 파일 분석을 먼저 완료해 주세요.");
       return;
     }
-
-    try {
-      setIsCreating(true);
-      setErrorMessage("");
-      await createProblemsFromAnalysis(analysis);
-      navigate("/problems");
-    } catch (error) {
-      setErrorMessage(error.message || "문제를 생성하지 못했습니다.");
-    } finally {
-      setIsCreating(false);
-    }
+    navigate("/problems");
   }
 
   return (
@@ -189,10 +177,9 @@ function ProblemCreatePage() {
             <button
               type="button"
               className="creation-submit"
-              disabled={isCreating}
               onClick={handleCreateProblems}
             >
-              {isCreating ? "AI가 코딩 문제 3개를 만들고 있습니다..." : "문법별 코딩 문제 3개 생성하기"}
+              생성된 코딩 문제 3개 확인하기
             </button>
           </section>
         )}

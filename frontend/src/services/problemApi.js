@@ -21,13 +21,6 @@ export function getProblem(problemId) {
   return request(`/api/problems/${problemId}?userId=${getUserId()}`);
 }
 
-export function createProblemsFromAnalysis(analysis) {
-  return request("/api/projects/problems", {
-    method: "POST",
-    body: JSON.stringify({ userId: getUserId(), code: analysis.sourceCode }),
-  });
-}
-
 export function submitSolution({ problemId, sourceCode }) {
   return request("/api/submissions", {
     method: "POST",
