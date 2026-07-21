@@ -22,9 +22,12 @@ public class GeminiService {
     private final WebClient webClient = WebClient.builder().baseUrl("https://generativelanguage.googleapis.com").build();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final JavaSyntaxDetector syntaxDetector;
+    private final String model;
 
-    public GeminiService(JavaSyntaxDetector syntaxDetector) {
+    public GeminiService(JavaSyntaxDetector syntaxDetector,
+                         @Value("${gemini.api.model:gemini-2.5-flash}") String model) {
         this.syntaxDetector = syntaxDetector;
+        this.model = model == null || model.isBlank() ? "gemini-2.5-flash" : model.trim();
     }
 
     private String callGemini(String prompt) {
@@ -33,7 +36,7 @@ public class GeminiService {
             "generationConfig", Map.of("responseMimeType", "application/json", "temperature", 0.2, "maxOutputTokens", 8192)
         );
         Map<?, ?> response = webClient.post()
-            .uri("/v1beta/models/gemini-2.5-flash-lite:generateContent")
+            .uri("/v1beta/models/{model}:generateContent", model)
             .header("X-goog-api-key", apiKey).contentType(MediaType.APPLICATION_JSON)
             .bodyValue(body).retrieve().bodyToMono(Map.class).block();
         if (response == null) throw new IllegalStateException("Gemini 응답이 없습니다.");
@@ -115,7 +118,7 @@ public class GeminiService {
             return new GeneratedLearningContent(analysis, codingProblems);
         } catch (Exception e) {
             if (e instanceof WebClientResponseException webClientError) {
-                log.warn("Gemini API 요청 실패: status={}", webClientError.getStatusCode().value());
+                log.warn("Gemini API 요청 실패: model={}, status={}", model, webClientError.getStatusCode().value());
                 throw webClientError;
             }
             if (e instanceof IllegalStateException state) throw state;

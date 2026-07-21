@@ -25,6 +25,7 @@ spring:
 gemini:
   api:
     key: ${GEMINI_API_KEY}
+    model: ${GEMINI_MODEL:gemini-2.5-flash}
 
 google:
   client-id: ${GOOGLE_CLIENT_ID:}
