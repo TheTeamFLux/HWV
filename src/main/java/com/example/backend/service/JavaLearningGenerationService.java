@@ -20,6 +20,7 @@ import java.util.List;
 
 @Service
 public class JavaLearningGenerationService {
+    private static final String GENERATION_RULE_VERSION = "typed-arguments-v2";
     private final GeminiService geminiService;
     private final UserRepository userRepository;
     private final CodingProblemRepository problemRepository;
@@ -41,7 +42,7 @@ public class JavaLearningGenerationService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
         String normalizedCode = code.replace("\r\n", "\n").replace('\r', '\n');
-        String sourceHash = hash(normalizedCode);
+        String sourceHash = hash(GENERATION_RULE_VERSION + "\n" + normalizedCode);
         JavaAnalysisCache cached = cacheRepository.findByUserAndSourceHash(user, sourceHash).orElse(null);
         if (cached != null) {
             return new JavaAnalysisResponse(cached.getSummary(), readGrammars(cached.getGrammarsJson()), cached.getSourceCode());

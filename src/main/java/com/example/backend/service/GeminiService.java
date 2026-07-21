@@ -76,6 +76,9 @@ public class GeminiService {
             프로그래머스 방식으로 사용자는 Solution 클래스의 solution 메서드만 구현하고 반환한다.
             methodName은 항상 solution이다. returnType과 parameterTypes는 실제 starterCode 선언과 정확히 일치해야 한다.
             지원 타입은 int, long, double, boolean, String과 이 타입들의 1차원 배열만 사용한다.
+            입력값의 형태와 parameterTypes를 반드시 일치시킨다. 숫자, boolean, JSON 배열을 편의상 String으로 선언하지 않는다.
+            예: 15는 int, 3000000000은 long, 1.5는 double, true는 boolean, [1,2,3]은 int[], [1.5,2.5]는 double[], ["a","b"]는 String[]이다.
+            실제 문자열 입력일 때만 String을 사용하며 사용자가 solution 안에서 숫자나 배열을 직접 파싱하게 만들지 않는다.
             starterCode는 public class Solution과 public solution 메서드를 포함하고 컴파일 가능한 기본 return 값을 넣되 정답 로직은 TODO로 남긴다.
             main 메서드, Scanner, System.in, System.out은 starterCode에 넣지 않는다. 서버가 숨겨진 실행 코드를 자동으로 붙인다.
             각 테스트의 arguments는 parameterTypes 순서와 개수가 같은 문자열 배열이다. 숫자와 boolean은 평문, String은 따옴표 없는 값, 배열은 JSON 배열 문자열로 작성한다.
@@ -146,7 +149,7 @@ public class GeminiService {
                 if (!"solution".equals(methodName)) throw new IllegalStateException("메서드 이름은 solution이어야 합니다.");
                 String returnType = supportedType(requiredText(node, "returnType", "반환형"));
                 List<String> parameterTypes = new ArrayList<>();
-                node.path("parameterTypes").forEach(type -> parameterTypes.add(supportedType(type.asText())));
+                for (JsonNode type : node.path("parameterTypes")) parameterTypes.add(supportedType(type.asText()));
                 if (parameterTypes.isEmpty()) throw new IllegalStateException(grammar + " 문제의 매개변수 타입이 없습니다.");
                 for (int testIndex = 0; testIndex < 3; testIndex++) {
                     JsonNode test = testNodes.get(testIndex);
@@ -161,7 +164,9 @@ public class GeminiService {
                         requiredValue(firstNonBlank(jsonValueText(test.path("expected")), jsonValueText(test.path("expectedOutput")), jsonValueText(test.path("output")), outputExample), "테스트 기대 출력"),
                         arguments));
                 }
+                parameterTypes = inferParameterTypes(parameterTypes, tests);
                 String starterCode = requiredText(node, "starterCode", "시작 코드");
+                starterCode = alignStarterParameterTypes(starterCode, returnType, parameterTypes);
                 if (!starterCode.matches("(?s).*\\bpublic\\s+class\\s+Solution\\b.*")) {
                     throw new IllegalStateException(grammar + " 문제의 시작 코드에 public class Solution이 없습니다.");
                 }
@@ -188,6 +193,62 @@ public class GeminiService {
             throw new IllegalStateException("지원하지 않는 solution 타입입니다: " + normalized);
         }
         return normalized;
+    }
+
+    private List<String> inferParameterTypes(List<String> declaredTypes, List<CodingProblemDraft.TestCase> tests) {
+        List<String> inferred = new ArrayList<>();
+        for (int index = 0; index < declaredTypes.size(); index++) {
+            List<String> values = new ArrayList<>();
+            for (CodingProblemDraft.TestCase test : tests) values.add(test.arguments().get(index));
+            inferred.add(inferType(values, declaredTypes.get(index)));
+        }
+        return inferred;
+    }
+
+    private String inferType(List<String> values, String fallback) {
+        try {
+            List<JsonNode> nodes = values.stream().map(value -> {
+                try { return objectMapper.readTree(value); }
+                catch (Exception ignored) { return objectMapper.getNodeFactory().textNode(value); }
+            }).toList();
+            if (nodes.stream().allMatch(JsonNode::isArray)) {
+                List<JsonNode> elements = new ArrayList<>();
+                nodes.forEach(array -> array.forEach(elements::add));
+                if (elements.isEmpty()) return fallback.endsWith("[]") ? fallback : "int[]";
+                if (elements.stream().allMatch(JsonNode::isBoolean)) return "boolean[]";
+                if (elements.stream().allMatch(JsonNode::isIntegralNumber)) {
+                    return elements.stream().allMatch(value -> value.canConvertToInt()) ? "int[]" : "long[]";
+                }
+                if (elements.stream().allMatch(JsonNode::isNumber)) return "double[]";
+                return "String[]";
+            }
+            if (nodes.stream().allMatch(JsonNode::isBoolean)) return "boolean";
+            if (nodes.stream().allMatch(JsonNode::isIntegralNumber)) {
+                return nodes.stream().allMatch(value -> value.canConvertToInt()) ? "int" : "long";
+            }
+            if (nodes.stream().allMatch(JsonNode::isNumber)) return "double";
+            return "String";
+        } catch (Exception ignored) {
+            return fallback;
+        }
+    }
+
+    private String alignStarterParameterTypes(String starterCode, String returnType, List<String> parameterTypes) {
+        java.util.regex.Pattern signature = java.util.regex.Pattern.compile(
+            "(?s)(\\bpublic\\s+" + java.util.regex.Pattern.quote(returnType) + "\\s+solution\\s*\\()([^)]*)(\\))");
+        java.util.regex.Matcher matcher = signature.matcher(starterCode);
+        if (!matcher.find()) return starterCode;
+        String[] parameters = matcher.group(2).split(",", -1);
+        if (parameters.length != parameterTypes.size()) return starterCode;
+        List<String> aligned = new ArrayList<>();
+        for (int index = 0; index < parameters.length; index++) {
+            String parameter = parameters[index].trim();
+            int space = parameter.lastIndexOf(' ');
+            if (space < 0) return starterCode;
+            aligned.add(parameterTypes.get(index) + " " + parameter.substring(space + 1).trim());
+        }
+        return matcher.replaceFirst(java.util.regex.Matcher.quoteReplacement(
+            matcher.group(1) + String.join(", ", aligned) + matcher.group(3)));
     }
 
     private String normalizeDifficulty(String difficulty) {
