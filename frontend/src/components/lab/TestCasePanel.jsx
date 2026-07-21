@@ -15,6 +15,8 @@ function TestCasePanel({ tests }) {
             <div className="test-item__summary">
               <strong>{test.name}</strong>
 
+              <small className="test-item__input">입력: {test.input}</small>
+
               <span className={"test-status test-status--" + test.status}>
                 <b>
                   {test.status === "passed"
@@ -30,7 +32,6 @@ function TestCasePanel({ tests }) {
                     : "대기"}
               </span>
 
-              <small>{test.reason || "실행 전"}</small>
             </div>
 
             {test.status === "failed" && (

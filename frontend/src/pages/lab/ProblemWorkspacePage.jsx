@@ -108,16 +108,18 @@ function ProblemWorkspacePage() {
   return (
     <div className="workspace-page">
       <div className="workspace-breadcrumb">
-        <Link to="/problems">AI 문제</Link>
+        <Link to="/problems">Java 문제</Link>
+        <span>›</span>
+        <span>{problem.grammarName || "코딩 테스트"}</span>
         <span>›</span>
         <strong>{problem.title}</strong>
       </div>
 
       <div className="workspace-grid">
         <div className="workspace-left">
-          <section className="problem-statement">
-            <div className="problem-statement__header">
-              <div>
+          <div className="workspace-problem-overview">
+            <section className="problem-statement problem-statement--intro">
+              <div className="problem-statement__header">
                 <h1>{problem.title}</h1>
                 <span
                   className={
@@ -132,22 +134,32 @@ function ProblemWorkspacePage() {
                   {problem.difficulty}
                 </span>
               </div>
-            </div>
+
+              <p>{problem.description}</p>
+            </section>
 
             {problem.summary && (
-              <div className="ai-summary-box">
-                <strong>AI 코드 요약</strong>
+              <div className="ai-summary-box workspace-ai-summary">
+                <strong>✦ AI 코드 요약</strong>
                 <p>{problem.summary}</p>
               </div>
             )}
+          </div>
 
-            <p>{problem.description}</p>
+          <section className="problem-statement problem-detail-card">
+            <div className="problem-detail-card__description">
+              <strong>문제 설명</strong>
+              <p>{problem.description}</p>
+            </div>
 
-            <ul>
-              {problem.requirements.map((requirement) => (
-                <li key={requirement}>{requirement}</li>
-              ))}
-            </ul>
+            <div className="problem-detail-card__requirements">
+              <strong>제약 조건</strong>
+              <ul>
+                {problem.requirements.map((requirement) => (
+                  <li key={requirement}>{requirement}</li>
+                ))}
+              </ul>
+            </div>
 
             <div className="example-block">
               <strong>입력 예시</strong>
@@ -158,16 +170,16 @@ function ProblemWorkspacePage() {
               <strong>출력 예시</strong>
               <pre>{problem.outputExample}</pre>
             </div>
-          </section>
 
-          <div className="ai-summary-box">
-            <strong>코드 작성 안내</strong>
-            <p>
-              {problem.methodName
-                ? "기본 Solution 클래스는 그대로 두고 solution 메서드 내부의 TODO와 return 부분만 수정해 주세요. 입력·출력 코드는 서버가 자동으로 처리합니다."
-                : "기본으로 제공되는 Main 클래스와 main 메서드는 그대로 두고 solution 메서드 내부만 수정해 주세요."}
-            </p>
-          </div>
+            <div className="workspace-writing-guide">
+              <strong>코드 작성 안내</strong>
+              <p>
+                {problem.methodName
+                  ? "기본 Solution 클래스는 그대로 두고 solution 메서드 내부의 TODO와 return 부분만 수정해 주세요. 입력·출력 코드는 서버가 자동으로 처리합니다."
+                  : "기본으로 제공되는 Main 클래스와 main 메서드는 그대로 두고 solution 메서드 내부만 수정해 주세요."}
+              </p>
+            </div>
+          </section>
 
           <CodeEditor
             value={sourceCode}
@@ -182,7 +194,7 @@ function ProblemWorkspacePage() {
               disabled={isSubmitting}
               onClick={handleSubmit}
             >
-              {isSubmitting ? "Java 코드를 실행하고 있습니다..." : "실행하기"}
+              {isSubmitting ? "Java 코드를 실행하고 있습니다..." : "▷ 코드 실행"}
             </button>
 
             <button
@@ -225,7 +237,15 @@ function ProblemWorkspacePage() {
                 코드를 실행하면 테스트 케이스별 실제 출력과 통과 여부가 표시됩니다.
               </div>
             ) : (
-              <>
+              <div className="workspace-result-content">
+                <div className={submissionResult.status === "passed" ? "workspace-result-summary workspace-result-summary--passed" : "workspace-result-summary workspace-result-summary--failed"}>
+                  <b>{submissionResult.status === "passed" ? "✓" : "!"}</b>
+                  <strong>
+                    {submissionResult.status === "passed"
+                      ? "모든 테스트 케이스를 통과했습니다!"
+                      : "통과하지 못한 테스트 케이스가 있습니다."}
+                  </strong>
+                </div>
                 {submissionResult.hint && (
                   <article className="feedback-box feedback-box--hint">
                     <strong>☼ 힌트</strong>
@@ -249,7 +269,7 @@ function ProblemWorkspacePage() {
                     )}
                   </article>
                 )}
-              </>
+              </div>
             )}
           </section>
         </aside>
