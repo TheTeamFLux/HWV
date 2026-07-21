@@ -46,7 +46,7 @@
 }
 
 .home-page__menu-grid a:hover {
-  border-color: #8fc18b;
+  border-color: #f0ad79;
   box-shadow: var(--shadow-card);
   transform: translateY(-3px);
 }

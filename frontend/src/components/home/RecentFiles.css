@@ -55,7 +55,7 @@
   height: 60px;
 
   color: var(--color-white);
-  background-color: #6eaf68;
+  background-color: #ff7a2b;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 800;
@@ -124,7 +124,7 @@
 
   color: var(--color-primary);
   background-color: var(--color-white);
-  border: 1px solid #77b873;
+  border: 1px solid #ee9d63;
   border-radius: 7px;
   font-size: 12px;
 }
