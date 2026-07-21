@@ -32,7 +32,7 @@ public class GeminiService {
             "generationConfig", Map.of("responseMimeType", "application/json", "temperature", 0.2, "maxOutputTokens", 8192)
         );
         Map<?, ?> response = webClient.post()
-            .uri("/v1beta/models/gemini-flash-latest:generateContent")
+            .uri("/v1beta/models/gemini-2.5-flash-lite:generateContent")
             .header("X-goog-api-key", apiKey).contentType(MediaType.APPLICATION_JSON)
             .bodyValue(body).retrieve().bodyToMono(Map.class).block();
         if (response == null) throw new IllegalStateException("Gemini 응답이 없습니다.");
