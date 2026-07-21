@@ -84,6 +84,8 @@ public class GeminiService {
             예: 15는 int, 3000000000은 long, 1.5는 double, true는 boolean, [1,2,3]은 int[], [1.5,2.5]는 double[], ["a","b"]는 String[]이다.
             실제 문자열 입력일 때만 String을 사용하며 사용자가 solution 안에서 숫자나 배열을 직접 파싱하게 만들지 않는다.
             starterCode는 public class Solution과 public solution 메서드를 포함하고 컴파일 가능한 기본 return 값을 넣되 정답 로직은 TODO로 남긴다.
+            starterCode는 반드시 4칸 들여쓰기와 줄바꿈을 적용한다. 클래스 선언, 메서드 선언, TODO, return, 닫는 중괄호를 각각 알맞은 줄에 작성한다.
+            starterCode 안에 마크다운 코드 블록(```java, ```)을 넣지 말고 순수 Java 코드만 작성한다.
             main 메서드, Scanner, System.in, System.out은 starterCode에 넣지 않는다. 서버가 숨겨진 실행 코드를 자동으로 붙인다.
             각 테스트의 arguments는 parameterTypes 순서와 개수가 같은 문자열 배열이다. 숫자와 boolean은 평문, String은 따옴표 없는 값, 배열은 JSON 배열 문자열로 작성한다.
             input은 화면 표시용 입력, expected는 solution의 기대 반환값을 문자열로 작성한다.
@@ -94,7 +96,7 @@ public class GeminiService {
             {"summary":"","grammars":[{"name":"","description":"","rating":3,"evidence":""}],
             "codingProblems":[{"title":"","description":"","requirements":[""],"inputExample":"","outputExample":"",
             "methodName":"solution","returnType":"int","parameterTypes":["int"],
-            "starterCode":"public class Solution { public int solution(int value) { /* TODO */ return 0; } }","difficulty":"쉬움|보통|어려움",
+            "starterCode":"public class Solution {\\n    public int solution(int value) {\\n        // TODO\\n        return 0;\\n    }\\n}","difficulty":"쉬움|보통|어려움",
             "tests":[{"name":"기본 케이스","input":"5","arguments":["5"],"expected":"10"}]}]}
 
             탐지 목록: %s
@@ -187,6 +189,7 @@ public class GeminiService {
                 parameterTypes = inferParameterTypes(parameterTypes, tests);
                 String starterCode = requiredText(node, "starterCode", "시작 코드");
                 starterCode = alignStarterParameterTypes(starterCode, returnType, parameterTypes);
+                starterCode = formatStarterCode(starterCode);
                 if (!starterCode.matches("(?s).*\\bpublic\\s+class\\s+Solution\\b.*")) {
                     throw new IllegalStateException(grammar + " 문제의 시작 코드에 public class Solution이 없습니다.");
                 }
@@ -269,6 +272,50 @@ public class GeminiService {
         }
         return matcher.replaceFirst(java.util.regex.Matcher.quoteReplacement(
             matcher.group(1) + String.join(", ", aligned) + matcher.group(3)));
+    }
+
+    private String formatStarterCode(String starterCode) {
+        String decoded = starterCode.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ").trim();
+        if (decoded.contains("\n")) return decoded;
+
+        String compact = decoded.replace("// TODO", "/* TODO */").replaceAll("\\s+", " ");
+        StringBuilder formatted = new StringBuilder();
+        StringBuilder line = new StringBuilder();
+        int indent = 0;
+        for (int index = 0; index < compact.length(); index++) {
+            if (compact.startsWith("/* TODO */", index)) {
+                appendStarterLine(formatted, line, indent);
+                line.append("/* TODO */");
+                appendStarterLine(formatted, line, indent);
+                index += "/* TODO */".length() - 1;
+                continue;
+            }
+
+            char current = compact.charAt(index);
+            if (current == '{') {
+                line.append('{');
+                appendStarterLine(formatted, line, indent++);
+            } else if (current == '}') {
+                appendStarterLine(formatted, line, indent);
+                indent = Math.max(0, indent - 1);
+                line.append('}');
+                appendStarterLine(formatted, line, indent);
+            } else if (current == ';') {
+                line.append(';');
+                appendStarterLine(formatted, line, indent);
+            } else {
+                line.append(current);
+            }
+        }
+        appendStarterLine(formatted, line, indent);
+        return formatted.toString().trim();
+    }
+
+    private void appendStarterLine(StringBuilder formatted, StringBuilder line, int indent) {
+        String value = line.toString().trim();
+        line.setLength(0);
+        if (value.isEmpty()) return;
+        formatted.append("    ".repeat(Math.max(0, indent))).append(value).append('\n');
     }
 
     private String normalizeDifficulty(String difficulty) {

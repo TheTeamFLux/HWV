@@ -86,8 +86,8 @@ public class ProblemGenerationService {
     private String starterCode(CodingProblem problem) {
         String starterCode = problem.getStarterCode();
         if (problem.getMethodName() != null && starterCode != null
-            && starterCode.matches("(?s).*\\bpublic\\s+class\\s+Solution\\b.*")) return starterCode;
-        if (starterCode != null && starterCode.matches("(?s).*\\bpublic\\s+class\\s+Main\\b.*")) return starterCode;
+            && starterCode.matches("(?s).*\\bpublic\\s+class\\s+Solution\\b.*")) return formatStarterCode(starterCode);
+        if (starterCode != null && starterCode.matches("(?s).*\\bpublic\\s+class\\s+Main\\b.*")) return formatStarterCode(starterCode);
         return """
             public class Main {
                 public static String solution(String input) {
@@ -101,6 +101,29 @@ public class ProblemGenerationService {
                 }
             }
             """;
+    }
+    private String formatStarterCode(String starterCode) {
+        String decoded = starterCode.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\t", "    ").trim();
+        if (decoded.contains("\n")) return decoded;
+
+        String compact = decoded.replace("// TODO", "/* TODO */").replaceAll("\\s+", " "); StringBuilder formatted = new StringBuilder();
+        StringBuilder line = new StringBuilder(); int indent = 0;
+        for (int index = 0; index < compact.length(); index++) {
+            if (compact.startsWith("/* TODO */", index)) {
+                appendStarterLine(formatted, line, indent); line.append("/* TODO */");
+                appendStarterLine(formatted, line, indent); index += "/* TODO */".length() - 1; continue;
+            }
+            char current = compact.charAt(index);
+            if (current == '{') { line.append('{'); appendStarterLine(formatted, line, indent++); }
+            else if (current == '}') { appendStarterLine(formatted, line, indent); indent = Math.max(0, indent - 1); line.append('}'); appendStarterLine(formatted, line, indent); }
+            else if (current == ';') { line.append(';'); appendStarterLine(formatted, line, indent); }
+            else line.append(current);
+        }
+        appendStarterLine(formatted, line, indent); return formatted.toString().trim();
+    }
+    private void appendStarterLine(StringBuilder formatted, StringBuilder line, int indent) {
+        String value = line.toString().trim(); line.setLength(0); if (value.isEmpty()) return;
+        formatted.append("    ".repeat(Math.max(0, indent))).append(value).append('\n');
     }
     private List<String> readStrings(String json) { try { return objectMapper.readValue(json, new TypeReference<>() {}); } catch (Exception e) { return List.of(); } }
     private List<CodingProblemDraft.TestCase> readTests(String json) { try { return objectMapper.readValue(json, new TypeReference<>() {}); } catch (Exception e) { return List.of(); } }
