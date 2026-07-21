@@ -1293,6 +1293,79 @@
   font-weight: 750;
 }
 
+.github-card {
+  margin-top: 18px;
+}
+
+.github-card > div:first-child p {
+  margin-top: 7px;
+  color: #7c837c;
+  font-size: 13px;
+}
+
+.github-connect-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.github-connect-form label {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.github-connect-form input {
+  height: 43px;
+  padding: 0 12px;
+  border: 1px solid #dce2db;
+  border-radius: 7px;
+}
+
+.github-connect-form button,
+.github-connection button,
+.github-publish-box button {
+  min-height: 40px;
+  padding: 0 16px;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: 7px;
+  font-weight: 750;
+}
+
+.github-connection {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 16px;
+  background: #f4f9f2;
+  border-radius: 9px;
+}
+
+.github-connection > div {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+  flex-direction: column;
+}
+
+.github-connection span {
+  color: #788078;
+  font-size: 12px;
+}
+
+.github-connection a,
+.github-publish-box a {
+  color: var(--color-primary);
+  font-weight: 750;
+}
+
+.github-publish-box {
+  color: #32823e;
+  background: #f2faf1;
+  border-color: #d5e8d2;
+}
+
 @media (max-width: 1100px) {
   .metric-grid,
   .problem-grid,

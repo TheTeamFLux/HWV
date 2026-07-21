@@ -28,3 +28,9 @@ gemini:
 
 google:
   client-id: ${GOOGLE_CLIENT_ID:}
+
+github:
+  app-id: ${GITHUB_APP_ID:}
+  app-slug: ${GITHUB_APP_SLUG:}
+  private-key: ${GITHUB_APP_PRIVATE_KEY:}
+  frontend-url: ${FRONTEND_URL:https://hwv.vercel.app}

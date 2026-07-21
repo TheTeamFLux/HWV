@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 
 import CodeEditor from "../../components/lab/CodeEditor";
 import TestCasePanel from "../../components/lab/TestCasePanel";
+import { publishSolutionToGitHub } from "../../services/githubApi";
 import { getProblem, submitSolution } from "../../services/problemApi";
 import "./LabPages.css";
 
@@ -17,6 +18,8 @@ function ProblemWorkspacePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [githubResult, setGitHubResult] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -69,6 +72,18 @@ function ProblemWorkspacePage() {
       setErrorMessage(error.message || "Java 코드 실행에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleGitHubPublish() {
+    try {
+      setIsPublishing(true);
+      setErrorMessage("");
+      setGitHubResult(await publishSolutionToGitHub(submissionResult.attempt.id));
+    } catch (error) {
+      setErrorMessage(error.message || "GitHub에 저장하지 못했습니다.");
+    } finally {
+      setIsPublishing(false);
     }
   }
 
@@ -222,6 +237,18 @@ function ProblemWorkspacePage() {
                   <strong>ⓘ 보완할 점</strong>
                   <p>{submissionResult.improvement}</p>
                 </article>
+                {submissionResult.status === "passed" && (
+                  <article className="feedback-box github-publish-box">
+                    <strong>GitHub 학습 기록</strong>
+                    {githubResult ? (
+                      <a href={githubResult.commitUrl} target="_blank" rel="noreferrer">커밋 확인하기</a>
+                    ) : (
+                      <button type="button" onClick={handleGitHubPublish} disabled={isPublishing}>
+                        {isPublishing ? "GitHub에 저장하고 있습니다..." : "GitHub에 저장"}
+                      </button>
+                    )}
+                  </article>
+                )}
               </>
             )}
           </section>
