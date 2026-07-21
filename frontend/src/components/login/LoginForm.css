@@ -46,7 +46,7 @@
   padding: 0 14px;
 
   background-color: var(--color-white);
-  border: 1px solid #d9ddd7;
+  border: 1px solid #ead8c8;
   border-radius: var(--radius-small);
 }
 
@@ -99,7 +99,7 @@
 .login-form__divider::after {
   flex: 1;
   height: 1px;
-  background-color: #e5e5e5;
+  background-color: #f0dfd0;
   content: "";
 }
 
@@ -114,7 +114,7 @@
 
   color: #444444;
   background-color: var(--color-white);
-  border: 1px solid #dcdcdc;
+  border: 1px solid #ead8c8;
   border-radius: var(--radius-small);
   overflow: hidden;
 }
@@ -122,6 +122,14 @@
 .login-form__google > div,
 .login-form__google iframe {
   max-width: 100%;
+}
+
+.login-form__heading h2,
+.login-form__heading p,
+.login-form__google,
+.login-form__signup {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .login-form__signup {

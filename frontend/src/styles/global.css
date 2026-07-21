@@ -1,5 +1,6 @@
 body {
   min-height: 100vh;
+  min-width: 320px;
   color: var(--color-text);
   background-color: var(--color-background);
   font-family:
@@ -7,10 +8,24 @@ body {
     "Noto Sans KR",
     Arial,
     sans-serif;
+  font-size: clamp(14px, 0.25vw + 13px, 16px);
+  overflow-wrap: anywhere;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
 
 button {
   border: none;
+}
+
+button,
+a {
+  word-break: keep-all;
 }
 
 input,

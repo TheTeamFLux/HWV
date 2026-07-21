@@ -1489,3 +1489,170 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Warm orange and cream visual theme */
+.lab-page {
+  background: radial-gradient(circle at 92% 4%, rgb(255 192 137 / 18%), transparent 240px), #fffaf3;
+}
+
+.surface-card,
+.metric-card,
+.problem-card,
+.creation-card,
+.problem-statement,
+.code-card,
+.test-card,
+.feedback-card,
+.accuracy-card,
+.category-chart,
+.weekly-chart,
+.profile-card,
+.github-card {
+  border-color: #f0ddcb;
+  box-shadow: 0 8px 26px rgb(153 82 29 / 7%);
+}
+
+.lab-page__eyebrow,
+.surface-card__header a,
+.section-heading > span,
+.problem-card__progress small,
+.grammar-card__rating,
+.grammar-card__rating i,
+.workspace-breadcrumb a,
+.java-quiz-card__number,
+.note-list a,
+.github-connection a,
+.github-publish-box a {
+  color: var(--color-primary);
+}
+
+.lab-primary-link,
+.filter-chip--active,
+.project-dropzone button,
+.selected-project button,
+.creation-analyze-button,
+.creation-submit,
+.difficulty-option--active,
+.submit-code-button,
+.java-quiz-submit,
+.github-connect-form button,
+.github-connection button,
+.github-publish-box button {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff812f, #ff5a0a);
+  border-color: #ff6b1a;
+  box-shadow: 0 7px 18px rgb(255 107 26 / 18%);
+}
+
+.filter-chip--active:hover,
+.lab-primary-link:hover,
+.creation-submit:hover,
+.submit-code-button:hover {
+  background: var(--color-primary-dark);
+}
+
+.difficulty--easy,
+.result-pill--passed,
+.selected-project .selected-project__language,
+.ai-generation-note,
+.ai-summary-box,
+.code-card__language,
+.quiz-result-card,
+.github-success,
+.github-connection .github-connection__status {
+  color: #cf540f;
+  background: #fff2e6;
+  border-color: #f5cfad;
+}
+
+.problem-card__progress > div,
+.lab-progress-card__track,
+.category-chart article > div,
+.weekly-chart__bars > div {
+  background: #f5e6d8;
+}
+
+.problem-card__progress > div span,
+.category-chart article b,
+.weekly-chart__bars span {
+  background: linear-gradient(90deg, #ff6b1a, #ff9a50);
+}
+
+.project-dropzone {
+  background: #fffdf9;
+  border-color: #efc9a8;
+}
+
+.selected-project,
+.difficulty-option--active,
+.java-quiz-options label:has(input:checked),
+.feedback-box--improvement {
+  color: #b84a0c;
+  background: #fff4e9;
+  border-color: #f0bd90;
+}
+
+.java-quiz-options input {
+  accent-color: var(--color-primary);
+}
+
+.code-editor,
+.example-block pre {
+  border-color: #ead8c8;
+}
+
+.lab-page__heading h1,
+.surface-card h2,
+.problem-card h2,
+.problem-statement__header h1,
+.note-list h2,
+.feedback-box p,
+.activity-list article,
+.github-card p {
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.lab-primary-link,
+.filter-chip,
+.difficulty-option,
+.creation-submit,
+.submit-code-button,
+.reset-code-button,
+.java-quiz-submit {
+  min-width: max-content;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .lab-page {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .lab-page__heading h1,
+  .problem-statement__header h1 {
+    font-size: clamp(23px, 7vw, 28px);
+    line-height: 1.3;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-row {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 5px;
+  }
+
+  .note-list article {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .note-list a {
+    min-width: 62px;
+    white-space: normal;
+  }
+}

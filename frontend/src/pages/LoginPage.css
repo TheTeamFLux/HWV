@@ -43,7 +43,7 @@
   height: 250px;
   margin-top: 30px;
 
-  background-color: #ebf3e5;
+  background: linear-gradient(145deg, #fff0df, #ffe0c4);
   border-radius: 50%;
 }
 
@@ -54,7 +54,7 @@
   height: 42px;
 
   background-color: var(--color-white);
-  border: 1px solid #d8dfd4;
+  border: 1px solid #f0d6bf;
   border-radius: 7px;
   box-shadow: 0 8px 20px rgb(0 0 0 / 8%);
 }
@@ -86,7 +86,7 @@
   height: 44px;
 
   color: var(--color-white);
-  background-color: #6fb061;
+  background-color: var(--color-primary);
   border-radius: 10px;
   font-weight: 800;
 }
@@ -111,7 +111,7 @@
   height: 7px;
   margin-bottom: 10px;
 
-  background-color: #bfd5b9;
+  background-color: #ffc79e;
   border-radius: 10px;
 }
 
@@ -121,7 +121,7 @@
 
 .login-page__sparkle {
   position: absolute;
-  color: #74b36b;
+  color: var(--color-primary);
   font-size: 25px;
 }
 
