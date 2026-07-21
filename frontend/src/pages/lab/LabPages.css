@@ -2033,7 +2033,7 @@
 }
 
 .workspace-grid {
-  grid-template-columns: minmax(0, 1fr) 370px;
+  grid-template-columns: minmax(0, 2.3fr) minmax(390px, 1fr);
   gap: 22px;
   overflow: visible;
   background: transparent;
@@ -2049,7 +2049,7 @@
 
 .workspace-problem-overview {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.95fr);
   gap: 18px;
 }
 
@@ -2177,7 +2177,7 @@
 }
 
 .code-editor {
-  height: 430px;
+  height: 360px;
   border: 0;
   border-radius: 0;
 }
