@@ -4,6 +4,8 @@ import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,6 +28,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class GitHubIntegrationService {
+    private static final Logger log = LoggerFactory.getLogger(GitHubIntegrationService.class);
     private static final Pattern REPOSITORY_URL = Pattern.compile("^https://github\\.com/([A-Za-z0-9_.-]+)/([A-Za-z0-9_.-]+?)(?:\\.git)?/?$");
     private final GitHubConnectionRepository connectionRepository;
     private final UserRepository userRepository;
@@ -66,6 +69,7 @@ public class GitHubIntegrationService {
         connection.setState(randomState());
         connection.setStateExpiresAt(LocalDateTime.now().plusMinutes(15));
         connectionRepository.save(connection);
+        log.info("GitHub connection started: userId={}, repository={}/{}", userId, matcher.group(1), matcher.group(2));
         String installUrl = "https://github.com/apps/" + appSlug + "/installations/new?state="
             + URLEncoder.encode(connection.getState(), StandardCharsets.UTF_8);
         return Map.of("installUrl", installUrl);
@@ -88,6 +92,8 @@ public class GitHubIntegrationService {
         connection.setState(null);
         connection.setStateExpiresAt(null);
         connectionRepository.save(connection);
+        log.info("GitHub connection completed: userId={}, installationId={}, repository={}/{}",
+            connection.getUser().getId(), installationId, connection.getRepositoryOwner(), connection.getRepositoryName());
         return frontendUrl + "/profile?github=connected&github_token="
             + URLEncoder.encode(publishToken, StandardCharsets.UTF_8);
     }
@@ -174,6 +180,7 @@ public class GitHubIntegrationService {
             signature.update(signingInput.getBytes(StandardCharsets.UTF_8));
             return signingInput + "." + base64Url(signature.sign());
         } catch (Exception exception) {
+            log.error("Failed to create GitHub App JWT. Check the App ID and private key format.", exception);
             throw new IllegalStateException("GitHub App 인증 정보를 만들지 못했습니다.", exception);
         }
     }

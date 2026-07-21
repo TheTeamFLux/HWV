@@ -9,6 +9,7 @@ function ProfilePage() {
   const displayName = user?.name || "사용자";
   const [repositoryUrl, setRepositoryUrl] = useState("");
   const [githubStatus, setGitHubStatus] = useState({ connected: false });
+  const [isGithubStatusLoading, setIsGithubStatusLoading] = useState(true);
   const [isConnecting, setIsConnecting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [connectionCompleted] = useState(
@@ -22,7 +23,10 @@ function ProfilePage() {
       saveGitHubPublishToken(githubToken);
       window.history.replaceState({}, "", "/profile?github=connected");
     }
-    getGitHubStatus().then(setGitHubStatus).catch(() => {});
+    getGitHubStatus()
+      .then(setGitHubStatus)
+      .catch((error) => setErrorMessage(`GitHub 연결 상태를 확인하지 못했습니다. ${error.message}`))
+      .finally(() => setIsGithubStatusLoading(false));
   }, []);
 
   async function handleConnect(event) {
@@ -88,7 +92,9 @@ function ProfilePage() {
           <p>통과한 문제 조건과 Solution 코드를 선택한 저장소에 커밋합니다.</p>
         </div>
 
-        {githubStatus.connected ? (
+        {isGithubStatusLoading ? (
+          <p className="github-status-loading" role="status">GitHub 연결 상태를 확인하고 있습니다.</p>
+        ) : githubStatus.connected ? (
           <>
             {connectionCompleted && (
               <p className="github-success" role="status">GitHub 저장소 연동이 완료되었습니다.</p>
