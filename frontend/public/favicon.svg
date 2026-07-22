@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>HWV</title>
+  <g fill="#EC5E27">
+    <circle cx="32" cy="17" r="12" />
+    <circle cx="19" cy="31" r="12" />
+    <circle cx="45" cy="31" r="12" />
+    <path d="M26 29h12c0 10 3 18 9 25H17c6-7 9-15 9-25Z" />
+  </g>
+</svg>
