@@ -61,9 +61,10 @@ function StatisticsPage() {
     ...item,
     emoji: accuracyEmoji(item.accuracy),
     x: 70 + index * (1060 / 6),
-    y: 135 - item.accuracy,
+    y: 165 - item.accuracy * 1.2,
   }));
   const weeklyPolyline = weeklyPoints.map((point) => `${point.x},${point.y}`).join(" ");
+  const weeklyArea = `70,165 ${weeklyPolyline} 1130,165`;
 
   if (isLoading) {
     return <div className="lab-page"><section className="large-empty">학습 통계를 불러오고 있습니다.</section></div>;
@@ -151,16 +152,24 @@ function StatisticsPage() {
           <h2>최근 7일 일별 정답률</h2>
           <div className="weekly-chart__line">
             <svg
-              viewBox="0 0 1200 180"
+              viewBox="0 0 1200 220"
               role="img"
               aria-label={`최근 7일 일별 정답률: ${dailyAccuracy.map((item) => item.accuracy + "%").join(", ")}`}
             >
+              <defs>
+                <linearGradient id="weekly-accuracy-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ec6b2d" stopOpacity="0.24" />
+                  <stop offset="70%" stopColor="#f5a06f" stopOpacity="0.09" />
+                  <stop offset="100%" stopColor="#fff8f2" stopOpacity="0" />
+                </linearGradient>
+              </defs>
               {[0, 20, 40, 60, 80, 100].map((percentage) => (
                 <g key={percentage}>
-                  <line className="weekly-chart__grid-line" x1="70" x2="1130" y1={135 - percentage} y2={135 - percentage} />
-                  <text className="weekly-chart__axis-label" x="48" y={139 - percentage}>{percentage}%</text>
+                  <line className="weekly-chart__grid-line" x1="70" x2="1130" y1={165 - percentage * 1.2} y2={165 - percentage * 1.2} />
+                  <text className="weekly-chart__axis-label" x="48" y={169 - percentage * 1.2}>{percentage}%</text>
                 </g>
               ))}
+              <polygon className="weekly-chart__area" points={weeklyArea} />
               <polyline className="weekly-chart__polyline" points={weeklyPolyline} />
               {weeklyPoints.map((point) => (
                 <g key={point.day}>
@@ -168,7 +177,7 @@ function StatisticsPage() {
                     {point.accuracy}%
                   </text>
                   <text className="weekly-chart__emoji" x={point.x} y={point.y + 6}>{point.emoji}</text>
-                  <text className="weekly-chart__day" x={point.x} y="168">{point.day}</text>
+                  <text className="weekly-chart__day" x={point.x} y="207">{point.day}</text>
                   <title>{`${point.day}요일: ${point.correct}/${point.total} 정답, 정답률 ${point.accuracy}%`}</title>
                 </g>
               ))}
