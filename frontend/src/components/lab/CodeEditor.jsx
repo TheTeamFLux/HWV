@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 
 function CodeEditor({ value, onChange, language }) {
   const textareaRef = useRef(null);
+  const lineNumbersRef = useRef(null);
   const lineNumbers = useMemo(() => {
     const count = Math.max(value.split("\n").length, 16);
     return Array.from({ length: count }, (_, index) => index + 1);
@@ -82,6 +83,12 @@ function CodeEditor({ value, onChange, language }) {
     restoreSelection(start + indentation.length, end + addedLength);
   }
 
+  function handleScroll(event) {
+    if (lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = event.currentTarget.scrollTop;
+    }
+  }
+
   return (
     <section className="code-card">
       <div className="code-card__header">
@@ -97,7 +104,11 @@ function CodeEditor({ value, onChange, language }) {
       </div>
 
       <div className="code-editor">
-        <pre className="code-editor__lines" aria-hidden="true">
+        <pre
+          ref={lineNumbersRef}
+          className="code-editor__lines"
+          aria-hidden="true"
+        >
           {lineNumbers.join("\n")}
         </pre>
         <textarea
@@ -107,6 +118,7 @@ function CodeEditor({ value, onChange, language }) {
           aria-label="소스 코드"
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
+          onScroll={handleScroll}
         />
       </div>
     </section>
