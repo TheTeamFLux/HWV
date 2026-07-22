@@ -10,11 +10,6 @@ function SignupPage() {
         <Link className="signup-page__logo" to="/login" aria-label="HWV 로그인으로 이동">
           <img src="/images/hwv-logo-cutout.png" alt="HWV" />
         </Link>
-
-        <p>
-          이미 계정이 있으신가요?
-          <Link to="/login">로그인</Link>
-        </p>
       </header>
 
       <main className="signup-page__main">
