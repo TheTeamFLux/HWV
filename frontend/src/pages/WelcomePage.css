@@ -129,7 +129,7 @@
 .introduction-page__server {
   position: relative;
   width: min(100%, 350px);
-  margin-top: -36px;
+  margin-top: 18px;
   text-align: center;
 }
 
@@ -241,7 +241,7 @@
   .introduction-page__layout { grid-template-columns: 1fr; }
   .introduction-page__visual { order: -1; min-height: 430px; border-bottom: 1px solid var(--intro-border); border-left: 0; }
   .introduction-page__large-logo { width: min(76vw, 360px); height: min(31vw, 148px); }
-  .introduction-page__server { margin-top: -35px; }
+  .introduction-page__server { margin-top: 14px; }
   .introduction-page__content { padding: 34px 22px 48px; }
   .introduction-page__hero { padding: 45px 0 34px; }
   .introduction-page__hero h1 { font-size: clamp(38px, 10vw, 52px); }
