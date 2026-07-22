@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -41,10 +41,9 @@ function LoginForm() {
 
   return (
     <section className="login-form">
-      <Sparkles className="login-form__sparkle" aria-hidden="true" />
       <div className="login-form__heading">
-        <h2>다시 만나서 반가워요!</h2>
-        <p>로그인하고 Java 학습을 계속 이어가세요.</p>
+        <h2>로그인</h2>
+        <p><strong>HWV</strong>와 함께 Java 학습을 이어가세요.</p>
       </div>
       <form onSubmit={handleSubmit} aria-busy={isLoggingIn}>
         <div className="login-form__field">
