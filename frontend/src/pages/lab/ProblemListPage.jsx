@@ -21,7 +21,12 @@ function ProblemListPage() {
   useEffect(() => {
     let active = true;
 
-    getProblems(language).then((result) => {
+    Promise.resolve().then(() => {
+      if (!active) return [];
+      setIsLoading(true);
+      setErrorMessage("");
+      return getProblems(language);
+    }).then((result) => {
       if (!active) return;
 
       if (result.length === 0) {

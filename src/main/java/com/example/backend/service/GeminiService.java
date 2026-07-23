@@ -210,6 +210,69 @@ public class GeminiService {
         }
     }
 
+    public List<CodingProblemTranslationDraft> translateProblems(
+            List<CodingProblemDraft> problems, String language) {
+        if (problems.isEmpty()) return List.of();
+
+        String targetLanguage = responseLanguage(language);
+        String prompt = """
+            Translate the natural-language content of every Java coding problem below into %s.
+            Return JSON only. Do not add Markdown fences or explanations.
+
+            Preserve the exact problem order. Translate only grammarName, title, description,
+            summary, requirements, and testNames. Keep Java keywords, identifiers, type names,
+            numbers, input values, expected values, and code unchanged.
+            Each translated problem must keep the exact number and order of requirements and
+            testNames from its original problem. Keep summary to one short sentence.
+
+            JSON format:
+            {"translations":[
+              {"grammarName":"","title":"","description":"","summary":"",
+               "requirements":[""],"testNames":[""]}
+            ]}
+
+            Original problems:
+            %s
+            """.formatted(targetLanguage, objectMapper.valueToTree(problems));
+        try {
+            JsonNode translationsNode = readGeminiJson(callGemini(prompt)).path("translations");
+            if (!translationsNode.isArray() || translationsNode.size() != problems.size()) {
+                throw new IllegalStateException("일괄 번역된 문제 수가 원본과 다릅니다.");
+            }
+
+            List<CodingProblemTranslationDraft> translations = new ArrayList<>();
+            for (int index = 0; index < problems.size(); index++) {
+                CodingProblemDraft problem = problems.get(index);
+                JsonNode node = translationsNode.get(index);
+                List<String> requirements = readTextArray(node.path("requirements"));
+                List<String> testNames = readTextArray(node.path("testNames"));
+                if (requirements.size() != problem.requirements().size()) {
+                    throw new IllegalStateException("일괄 번역된 제약 조건 수가 원본과 다릅니다.");
+                }
+                if (testNames.size() != problem.tests().size()) {
+                    throw new IllegalStateException("일괄 번역된 테스트 이름 수가 원본과 다릅니다.");
+                }
+                translations.add(new CodingProblemTranslationDraft(
+                    requiredText(node, "grammarName", "번역 문법명"),
+                    requiredText(node, "title", "번역 제목"),
+                    requiredText(node, "description", "번역 설명"),
+                    requiredText(node, "summary", "번역 요약"),
+                    requirements,
+                    testNames
+                ));
+            }
+            return translations;
+        } catch (Exception e) {
+            if (e instanceof WebClientResponseException webClientError) {
+                log.warn("Gemini 문제 일괄 번역 요청 실패: model={}, status={}, response={}",
+                    model, webClientError.getStatusCode().value(), safeErrorResponse(webClientError));
+                throw webClientError;
+            }
+            if (e instanceof IllegalStateException state) throw state;
+            throw new IllegalStateException("문제 일괄 번역 결과를 처리하지 못했습니다.", e);
+        }
+    }
+
     private List<String> readTextArray(JsonNode node) {
         List<String> values = new ArrayList<>();
         if (node.isArray()) node.forEach(item -> values.add(item.asText()));

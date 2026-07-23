@@ -33,7 +33,7 @@ public class ProblemGenerationService {
         return findAll(request.getUserId(), "ko").stream().limit(3).toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<Map<String, Object>> findAll(Long userId, String language) {
         User user = user(userId); Set<Long> solved = new HashSet<>();
         submissionRepository.findByUserOrderBySubmittedAtDesc(user).stream().filter(CodingSubmission::isPassed)
@@ -45,6 +45,20 @@ public class ProblemGenerationService {
             translationRepository.findByProblemIdInAndLanguage(
                 problems.stream().map(CodingProblem::getId).toList(), targetLanguage
             ).forEach(item -> translations.put(item.getProblem().getId(), item));
+        }
+        List<CodingProblem> missingTranslations = problems.stream()
+            .filter(problem -> !targetLanguage.equals(detectLanguage(problem)))
+            .filter(problem -> !translations.containsKey(problem.getId()))
+            .toList();
+        if (!missingTranslations.isEmpty()) {
+            List<CodingProblemTranslationDraft> drafts = geminiService.translateProblems(
+                missingTranslations.stream().map(this::toDraft).toList(), targetLanguage);
+            List<CodingProblemTranslation> saved = new ArrayList<>();
+            for (int index = 0; index < missingTranslations.size(); index++) {
+                saved.add(toTranslation(missingTranslations.get(index), targetLanguage, drafts.get(index)));
+            }
+            translationRepository.saveAll(saved)
+                .forEach(item -> translations.put(item.getProblem().getId(), item));
         }
         return problems.stream().map(problem -> response(problem, solved.contains(problem.getId()),
             translations.get(problem.getId()), targetLanguage)).toList();
@@ -124,13 +138,18 @@ public class ProblemGenerationService {
 
     private CodingProblemTranslation createTranslation(CodingProblem problem, String language) {
         CodingProblemTranslationDraft draft = geminiService.translateProblem(toDraft(problem), language);
+        return translationRepository.save(toTranslation(problem, language, draft));
+    }
+
+    private CodingProblemTranslation toTranslation(CodingProblem problem, String language,
+                                                     CodingProblemTranslationDraft draft) {
         CodingProblemTranslation translation = new CodingProblemTranslation();
         translation.setProblem(problem); translation.setLanguage(language);
         translation.setGrammarName(draft.grammarName()); translation.setTitle(draft.title());
         translation.setDescription(draft.description()); translation.setSummary(draft.summary());
         translation.setRequirementsJson(write(draft.requirements()));
         translation.setTestNamesJson(write(draft.testNames()));
-        return translationRepository.save(translation);
+        return translation;
     }
 
     private String normalizeLanguage(String language) {
