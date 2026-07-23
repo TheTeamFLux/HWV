@@ -1,67 +1,177 @@
-# Naver OGQ AI
-<h3>HWV</h3>
-<p>Help With Vision</p>
+# NAVER OGQ AI
+HWV (Help With Vision)
 
-#### 배경
-소프트웨어 엔지니어 채용에서 코딩 테스트와 기술 면접의 중요성은 날로 커지고 있으며, 개발자들은 공식 문서, 기술 블로그, 전공 서적(CS)을 통해 끊임없이 학습해야 한다.
+### 배경
 
-#### 문제점
-**맞춤형 연습 문제 부족**: 기존 플랫폼은 정형화된 문제만 제공할 뿐, 내가 실제로 공부하고 싶은 코딩 테스트 문제를 찾기 어려움.<br>
-**복습의 부재**: 한 번 틀린 알고리즘 개념이나 구현 실수를 체계적으로 오답 노트화하고 복습하지 않아 유사한 유형에서 반복적으로 감점당함.
+프로그래밍 학습에서는 단순히 문법을 익히는 것보다 직접 코드를 작성하고 피드백을 받는 과정이 중요합니다. 하지만 기존 학습 플랫폼은 모든 사용자에게 동일한 문제를 제공하기 때문에 개인의 학습 수준과 작성한 코드에 맞는 맞춤형 학습이 어렵습니다.
+
+또한 자신이 작성한 코드를 기반으로 부족한 개념을 파악하고 반복적으로 학습할 수 있는 환경이 부족하여 학습 효율이 떨어지는 문제가 있습니다.
+
+### 문제점
+
+#### 1. 획일적인 학습 환경
+
+기존 플랫폼은 정형화된 문제만 제공하기 때문에 개인의 수준과 학습 내용에 맞는 실습이 어렵습니다.
+
+#### 2. 코드 기반 피드백 부족
+
+사용자가 작성한 Java 코드를 분석하여 어떤 문법을 사용했고 어떤 개념을 더 학습해야 하는지 알려주는 맞춤형 피드백이 부족합니다.
+
+#### 3. 지속적인 학습 관리의 어려움
+
+문제를 해결한 이후에도 제출 기록과 학습 결과를 체계적으로 관리하기 어려워 반복 학습과 성장을 이어가기 어렵습니다.
+
+### 해결 방안 (HWV의 가치)
+
+HWV는 사용자가 업로드한 Java 코드를 AI가 분석하여 핵심 문법을 추출하고, 이를 기반으로 개인 맞춤형 코딩 문제를 생성하는 AI 기반 학습 플랫폼입니다.
+
+생성된 문제는 실제 Java 컴파일러를 통해 채점되며, 제출 결과와 학습 기록을 저장하여 사용자가 자신의 성장 과정을 확인하고 반복 학습할 수 있도록 지원합니다.
+
+또한 Render 무료 서버의 초기 지연 문제를 해결하기 위해 로그인 전 프로젝트 소개 화면을 제공하고, 백그라운드에서 서버를 미리 활성화하여 보다 자연스러운 사용자 경험을 제공합니다.
+
+### 시스템 아키텍처
+
+#### 데이터 및 서비스 흐름
+
+**Client (Frontend)**
+
+- Java 파일 업로드
+- AI 분석 결과 확인
+- 생성된 코딩 문제 풀이
+- 코드 제출 및 결과 확인
+- 학습 통계 및 제출 기록 조회
+
+**Server (Backend)**
+
+- Java 문법 분석
+- Gemini AI 호출
+- 맞춤형 문제 생성
+- Java 코드 컴파일 및 실행
+- 테스트 케이스 기반 자동 채점
+- 결과 저장 및 학습 데이터 관리
+
+**AI Pipeline**
+
+- Java 코드 분석
+- 핵심 문법 추출
+- 코드 요약 생성
+- 맞춤형 코딩 문제 생성
+
+**Database**
+
+- 사용자 정보
+- 코드 분석 결과
+- 생성된 문제
+- 제출 기록
+- 학습 통계
 
 ---
 
-#### 해결 방안 (HWV의 가치)
-사용자가 기술 문서, PDF, 전공 서적 링크를 업로드하면, AI가 그 핵심 개념을 관통하는 '코딩 테스트 문제(제한사항, 입출력 예시 포함)'를 자동으로 생성하고, 채점 및 망각 곡선 기반 오답 노트를 제공하여 이론을 실전 코딩 역량으로 즉시 전환함.
-
----
-
-#### 시스템 아키텍처
-
-데이터 및 서비스 흐름<br>
-사용자가 문서를 업로드했을 때, AI가 코딩 테스트 문제를 생성하고 사용자의 코드를 채점하는 흐름입니다.
-데이터 및 서비스 흐름
-1. **Client (Frontend)**: 기술 문서 URL 또는 PDF 업로드 -> AI가 생성한 코테 문제 확인 -> 웹 IDE에서 코드 작성 후 제출.
-2. **Server (Backend)**: 텍스트 파싱 및 AI 파이프라인 구동. 사용자가 제출한 코드를 안전하게 실행하기 위한 격리된 환경(Sandbox) 제공.
-3. **AI Pipeline**: 본문을 분석하여 알고리즘 유형을 선정하고, 입출력 예시(Test Cases)를 포함한 코테 문제를 생성.
-4. **Database & Scheduler**: 퀴즈 결과 및 사용자 제출 코드를 저장. 틀린 문제는 스케줄러를 통해 망각 곡선 주기에 맞춰 재풀이 알림 발송.
-
----
-
-#### 사용 스택
+### 사용 스택
 
 | 분류 | 기술 스택 |
-| --- | --- |
-| Backend | Spring Boot(Java), MySQL(DB), Render|
-| Frontend | HTML, JavaScript, CSS, React, Netlify |
+|------|-----------|
+| Backend | Spring Boot, Java 21, Spring Security, Spring Data JPA |
+| Frontend | React, JavaScript, CSS |
+| Database | MySQL |
+| AI | Google Gemini 2.5 Flash Lite |
+| Deployment | Render, Vercel |
 | Design | Figma |
-| IDE / Tool | VScode, InteliJ, Codex, ChatGPT, Claude |
+| IDE / Tools | IntelliJ IDEA, VS Code, ChatGPT, Claude, Codex |
 
 ---
 
-#### 실행 방법
+### 실행 방법
 
-> _추가 예정_
+#### Backend
+
+```bash
+git clone <repository-url>
+
+cd backend
+
+./gradlew bootRun
+```
+
+#### Frontend
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+#### 환경 변수
+
+```properties
+SPRING_DATASOURCE_URL=
+
+SPRING_DATASOURCE_USERNAME=
+
+SPRING_DATASOURCE_PASSWORD=
+
+GEMINI_API_KEY=
+
+JWT_SECRET=
+
+FRONTEND_URL=
+```
 
 ---
 
-#### AI 사용 내역
-사용한 LLM 모델<br>
-ChatGPT, Gemini, Claude
+### AI 사용 내역
 
----
+#### 사용한 AI 모델
 
-#### 라이선스
-> _추가 예정_
+- Google Gemini 2.5 Flash Lite
+- ChatGPT
+- Claude
+- Codex
 
----
+#### 활용 내용
 
-#### 하단 명시
+- Java 코드 분석 및 맞춤형 문제 생성
+- 코드 리팩토링 및 개발 보조
+- UI/UX 디자인 아이디어
+- README 및 발표 자료 작성
+- 테스트 코드 작성 보조
 
-##### 사용한 AI 모델
-Claude, ChatGPT, Gemini, Codex
+### 라이선스
 
----
+본 프로젝트는 NAVER OGQ AI 공모전 출품을 목적으로 제작되었습니다.
 
-#### 오픈소스 패키지
-> _추가 예정_
+MIT License를 따릅니다.
+
+### 사용한 AI 모델
+
+- ChatGPT
+- Claude
+- Google Gemini 2.5 Flash Lite
+- Codex
+
+### 오픈소스 패키지
+
+#### Backend
+
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- Lombok
+- Jackson
+- MySQL Connector/J
+- JJWT
+
+#### Frontend
+
+- React
+- React Router
+- Axios
+- Lucide React
+- Framer Motion
+
+#### Build Tool
+
+- Gradle
+- Vite
