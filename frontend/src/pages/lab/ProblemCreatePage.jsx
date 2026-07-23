@@ -11,11 +11,18 @@ const copy = {
   ja: { eyebrow: "HWV CODE LAB", title: "新しい問題を作る", subtitle: "Javaファイルをアップロードすると、重要な文法を分析してコーディング問題を3問作成します。", drop: "Javaファイルをドラッグするか、下のボタンから選択してください。", onlyJava: ".javaファイルのみ選択できます。", select: "Javaファイルを選択", selected: "ファイル選択完了", language: "分析言語", ready: "AI分析を開始できます。", remove: "ファイルを削除", difficulty: "問題の難易度", labels: ["バランス", "簡単", "普通", "難しい"], balanced: "簡単・普通・難しい問題を1問ずつ作成します。", three: "同じ難易度で3問作成します。", analyze: "AI分析を開始", analyzing: "AIがJavaコードを分析しています...", result: "AI分析結果", resultHelp: "アップロードしたコードから見つかった重要なJava文法です。", view: "生成された3問を確認する", javaOnly: ".java拡張子のJavaファイルのみアップロードできます。", choose: "分析するJavaファイルを先に選択してください。", failed: "Javaファイルを分析できませんでした。", analyzeFirst: "Javaファイルの分析を先に完了してください。", importance: "重要度" },
 };
 
+const aiDisclosure = {
+  ko: "본 학습 콘텐츠와 코딩 문제는 Google Gemini를 활용하여 생성되었습니다. AI 생성 결과에는 부정확한 내용이 포함될 수 있습니다.",
+  en: "This learning content and its coding problems were generated with Google Gemini. AI-generated results may contain inaccuracies.",
+  ja: "この学習コンテンツとコーディング問題はGoogle Geminiを活用して生成されました。AIの生成結果には不正確な内容が含まれる場合があります。",
+};
+
 function ProblemCreatePage() {
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const { language } = useLanguage();
   const text = copy[language] || copy.ko;
+  const disclosure = aiDisclosure[language] || aiDisclosure.ko;
   const [selectedFile, setSelectedFile] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [difficulty, setDifficulty] = useState("균형");
@@ -47,7 +54,7 @@ function ProblemCreatePage() {
         <fieldset className="difficulty-field difficulty-field--creation"><legend>{text.difficulty}</legend><div className="difficulty-options difficulty-options--four">{difficultyValues.map((value, index) => <button key={value} type="button" className={difficulty === value ? "difficulty-option difficulty-option--active" : "difficulty-option"} onClick={() => setDifficulty(value)} disabled={isAnalyzing}>{text.labels[index]}</button>)}</div><small>{difficulty === "균형" ? text.balanced : `${text.labels[difficultyValues.indexOf(difficulty)]} ${text.three}`}</small></fieldset>
         <button type="submit" className="creation-analyze-button" disabled={isAnalyzing || !selectedFile}>{isAnalyzing ? text.analyzing : text.analyze}</button>
       </section>
-      {analysis && <section className="analysis-result-section"><div className="section-heading"><span>2</span><div><h2>{text.result}</h2><p>{text.resultHelp}</p></div></div><div className="grammar-card-grid">{analysis.grammars.map((grammar) => <article className="grammar-card" key={grammar.name}><strong>{grammar.name}</strong><span className="grammar-card__rating" aria-label={`${text.importance}: ${grammar.rating}/5`}>{"★".repeat(grammar.rating)}<i>{"★".repeat(5 - grammar.rating)}</i></span><p>{grammar.description}</p></article>)}</div><button type="button" className="creation-submit" onClick={() => navigate("/problems")}>{text.view}</button></section>}
+      {analysis && <section className="analysis-result-section"><div className="section-heading"><span>2</span><div><h2>{text.result}</h2><p>{text.resultHelp}</p></div></div><div className="grammar-card-grid">{analysis.grammars.map((grammar) => <article className="grammar-card" key={grammar.name}><strong>{grammar.name}</strong><span className="grammar-card__rating" aria-label={`${text.importance}: ${grammar.rating}/5`}>{"★".repeat(grammar.rating)}<i>{"★".repeat(5 - grammar.rating)}</i></span><p>{grammar.description}</p></article>)}</div><p className="ai-generated-notice" role="note"><b>AI</b><span>{disclosure}</span></p><button type="button" className="creation-submit" onClick={() => navigate("/problems")}>{text.view}</button></section>}
       {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
     </form>
   </div>;

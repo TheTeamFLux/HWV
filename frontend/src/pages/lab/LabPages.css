@@ -506,6 +506,31 @@
   margin-top: 20px;
 }
 
+.ai-generated-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  color: #6b5548;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  background: #fff7ef;
+  border: 1px solid #f3d8c4;
+  border-radius: 12px;
+}
+
+.ai-generated-notice b {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 18px;
+  background: var(--color-primary);
+  border-radius: 6px;
+}
+
 .creation-fields {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2182,6 +2207,10 @@
 .workspace-ai-summary strong {
   color: var(--color-primary);
   font-size: 14px;
+}
+
+.workspace-ai-notice {
+  margin-top: 12px;
 }
 
 .problem-detail-card {

@@ -9,12 +9,17 @@ import { useLanguage } from "../../i18n/LanguageContext";
 import "./LabPages.css";
 
 function ProblemWorkspacePage() {
-  const { t } = useLanguage();
+  const { language: uiLanguage, t } = useLanguage();
   const { problemId } = useParams();
 
   const [problem, setProblem] = useState(null);
   const [sourceCode, setSourceCode] = useState("");
   const [language, setLanguage] = useState("Java");
+  const aiCopy = ({
+    ko: { title: "✦ AI 코드 요약", notice: "이 요약은 Google Gemini를 활용하여 생성되었습니다. AI 생성 결과에는 부정확한 내용이 포함될 수 있습니다." },
+    en: { title: "✦ AI code summary", notice: "This summary was generated with Google Gemini. AI-generated results may contain inaccuracies." },
+    ja: { title: "✦ AIコード要約", notice: "この要約はGoogle Geminiを活用して生成されました。AIの生成結果には不正確な内容が含まれる場合があります。" },
+  })[uiLanguage] || { title: "✦ AI 코드 요약", notice: "이 요약은 Google Gemini를 활용하여 생성되었습니다. AI 생성 결과에는 부정확한 내용이 포함될 수 있습니다." };
   const [tests, setTests] = useState([]);
   const [submissionResult, setSubmissionResult] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -270,8 +275,9 @@ function ProblemWorkspacePage() {
 
           {problem.summary && (
             <section className="ai-summary-box workspace-ai-summary">
-              <strong>✦ AI 코드 요약</strong>
+              <strong>{aiCopy.title}</strong>
               <p>{problem.summary}</p>
+              <p className="ai-generated-notice workspace-ai-notice" role="note"><b>AI</b><span>{aiCopy.notice}</span></p>
             </section>
           )}
         </aside>
