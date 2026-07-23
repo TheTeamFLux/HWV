@@ -1,7 +1,15 @@
+import { useLanguage } from "../../i18n/LanguageContext";
+
 function TestCasePanel({ tests }) {
+  const { language } = useLanguage();
+  const text = ({
+    ko: { title: "실행 테스트 케이스", input: "입력", passed: "통과", failed: "실패", waiting: "대기", expected: "기대 출력", actual: "내 코드 출력" },
+    en: { title: "Test Cases", input: "Input", passed: "Passed", failed: "Failed", waiting: "Waiting", expected: "Expected", actual: "Your Output" },
+    ja: { title: "テストケース", input: "入力", passed: "合格", failed: "失敗", waiting: "待機", expected: "期待する出力", actual: "コードの出力" },
+  })[language];
   return (
     <section className="test-card">
-      <h2>실행 테스트 케이스</h2>
+      <h2>{text.title}</h2>
 
       <div className="test-list">
         {tests.map((test) => (
@@ -15,7 +23,7 @@ function TestCasePanel({ tests }) {
             <div className="test-item__summary">
               <strong>{test.name}</strong>
 
-              <small className="test-item__input">입력: {test.input}</small>
+              <small className="test-item__input">{text.input}: {test.input}</small>
 
               <span className={"test-status test-status--" + test.status}>
                 <b>
@@ -26,21 +34,21 @@ function TestCasePanel({ tests }) {
                       : "·"}
                 </b>
                 {test.status === "passed"
-                  ? "예상 통과"
+                  ? text.passed
                   : test.status === "failed"
-                    ? "예상 실패"
-                    : "대기"}
+                    ? text.failed
+                    : text.waiting}
               </span>
 
             </div>
 
             {test.status === "failed" && (
               <div className="test-item__details">
-                <span>입력</span>
+                <span>{text.input}</span>
                 <code>{test.input}</code>
-                <span>기대 출력</span>
+                <span>{text.expected}</span>
                 <code>{test.expected}</code>
-                <span>내 코드 출력</span>
+                <span>{text.actual}</span>
                 <code>{test.actual}</code>
               </div>
             )}

@@ -1,6 +1,13 @@
 import { useMemo, useRef } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 function CodeEditor({ value, onChange, language }) {
+  const { language: uiLanguage } = useLanguage();
+  const text = ({
+    ko: { title: "코드 작성", detected: "자동 감지", languageLabel: "자동 감지된 프로그래밍 언어", source: "소스 코드" },
+    en: { title: "Code Editor", detected: "Detected", languageLabel: "Detected programming language", source: "Source code" },
+    ja: { title: "コード作成", detected: "自動検出", languageLabel: "自動検出されたプログラミング言語", source: "ソースコード" },
+  })[uiLanguage];
   const textareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
   const lineNumbers = useMemo(() => {
@@ -92,13 +99,13 @@ function CodeEditor({ value, onChange, language }) {
   return (
     <section className="code-card">
       <div className="code-card__header">
-        <h2>코드 작성</h2>
+        <h2>{text.title}</h2>
 
         <output
           className="code-card__language"
-          aria-label="자동 감지된 프로그래밍 언어"
+          aria-label={text.languageLabel}
         >
-          <span>자동 감지</span>
+          <span>{text.detected}</span>
           <strong>{language}</strong>
         </output>
       </div>
@@ -115,7 +122,7 @@ function CodeEditor({ value, onChange, language }) {
           ref={textareaRef}
           value={value}
           spellCheck="false"
-          aria-label="소스 코드"
+          aria-label={text.source}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
           onScroll={handleScroll}

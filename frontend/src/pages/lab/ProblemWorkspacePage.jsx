@@ -8,8 +8,30 @@ import { getProblem, submitSolution } from "../../services/problemApi";
 import { useLanguage } from "../../i18n/LanguageContext";
 import "./LabPages.css";
 
+const workspaceCopy = {
+  ko: {
+    javaProblems: "Java 문제", codingTest: "코딩 테스트", notFound: "문제를 찾을 수 없습니다.", notFoundHelp: "코드를 업로드해 새로운 AI 문제를 만들어 주세요.", createAi: "＋ AI 문제 만들기",
+    description: "문제 설명", requirements: "제약 조건", inputExample: "입력 예시", outputExample: "출력 예시", guide: "코드 작성 안내", methodGuide: "기본 Solution 클래스는 그대로 두고 solution 메서드 내부의 TODO와 return 부분만 수정해 주세요. 입력·출력 코드는 서버가 자동으로 처리합니다.", mainGuide: "기본으로 제공되는 Main 클래스와 main 메서드는 그대로 두고 solution 메서드 내부만 수정해 주세요.",
+    running: "Java 코드를 실행하고 있습니다...", run: "▷ 코드 실행", reset: "↻ 코드 초기화", runFailed: "Java 코드 실행에 실패했습니다.", githubFailed: "GitHub에 저장하지 못했습니다.", result: "실행 결과", success: "성공", failure: "실패", resultEmpty: "코드를 실행하면 테스트 케이스별 실제 출력과 통과 여부가 표시됩니다.", allPassed: "모든 테스트 케이스를 통과했습니다!", someFailed: "통과하지 못한 테스트 케이스가 있습니다.", hint: "☼ 힌트", improvement: "ⓘ 보완할 점", githubLearning: "GitHub 학습 기록", viewCommit: "커밋 확인하기", savingGithub: "GitHub에 저장하고 있습니다...", saveGithub: "GitHub에 저장",
+    difficulty: { "쉬움": "쉬움", "보통": "보통", "어려움": "어려움" }, categories: { "메서드 선언": "메서드 선언", "조건문": "조건문", "for문": "for문", "클래스 선언": "클래스 선언", "배열": "배열" },
+  },
+  en: {
+    javaProblems: "Java Problems", codingTest: "Coding Test", notFound: "Problem not found.", notFoundHelp: "Upload code to create new AI problems.", createAi: "＋ Create AI Problems",
+    description: "Description", requirements: "Constraints", inputExample: "Input Example", outputExample: "Output Example", guide: "Coding Guide", methodGuide: "Keep the provided Solution class and edit only the TODO and return statement inside the solution method. The server handles input and output automatically.", mainGuide: "Keep the provided Main class and main method, and edit only the inside of the solution method.",
+    running: "Running Java code...", run: "▷ Run Code", reset: "↻ Reset Code", runFailed: "Failed to run the Java code.", githubFailed: "Failed to save to GitHub.", result: "Result", success: "Passed", failure: "Failed", resultEmpty: "Run your code to see the actual output and pass status for each test case.", allPassed: "All test cases passed!", someFailed: "Some test cases did not pass.", hint: "☼ Hint", improvement: "ⓘ What to Improve", githubLearning: "GitHub Learning Record", viewCommit: "View Commit", savingGithub: "Saving to GitHub...", saveGithub: "Save to GitHub",
+    difficulty: { "쉬움": "Easy", "보통": "Medium", "어려움": "Hard" }, categories: { "메서드 선언": "Method", "조건문": "Conditionals", "for문": "For Loop", "클래스 선언": "Class", "배열": "Array" },
+  },
+  ja: {
+    javaProblems: "Java問題", codingTest: "コーディングテスト", notFound: "問題が見つかりません。", notFoundHelp: "コードをアップロードして新しいAI問題を作成してください。", createAi: "＋ AI問題を作る",
+    description: "問題説明", requirements: "制約条件", inputExample: "入力例", outputExample: "出力例", guide: "作成ガイド", methodGuide: "基本のSolutionクラスはそのままにして、solutionメソッド内のTODOとreturn部分のみ修正してください。入出力はサーバーが自動処理します。", mainGuide: "基本のMainクラスとmainメソッドはそのままにして、solutionメソッドの内部のみ修正してください。",
+    running: "Javaコードを実行しています...", run: "▷ コード実行", reset: "↻ コード初期化", runFailed: "Javaコードを実行できませんでした。", githubFailed: "GitHubに保存できませんでした。", result: "実行結果", success: "成功", failure: "失敗", resultEmpty: "コードを実行すると、各テストケースの実際の出力と合否が表示されます。", allPassed: "すべてのテストケースに合格しました！", someFailed: "合格していないテストケースがあります。", hint: "☼ ヒント", improvement: "ⓘ 改善点", githubLearning: "GitHub学習記録", viewCommit: "コミットを確認", savingGithub: "GitHubに保存しています...", saveGithub: "GitHubに保存",
+    difficulty: { "쉬움": "簡単", "보통": "普通", "어려움": "難しい" }, categories: { "메서드 선언": "メソッド宣言", "조건문": "条件文", "for문": "for文", "클래스 선언": "クラス宣言", "배열": "配列" },
+  },
+};
+
 function ProblemWorkspacePage() {
   const { language: uiLanguage, t } = useLanguage();
+  const text = workspaceCopy[uiLanguage] || workspaceCopy.ko;
   const { problemId } = useParams();
 
   const [problem, setProblem] = useState(null);
@@ -76,7 +98,7 @@ function ProblemWorkspacePage() {
       setTests(result.tests);
       setSubmissionResult(result);
     } catch (error) {
-      setErrorMessage(error.message || "Java 코드 실행에 실패했습니다.");
+      setErrorMessage(error.message || text.runFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +110,7 @@ function ProblemWorkspacePage() {
       setErrorMessage("");
       setGitHubResult(await publishSolutionToGitHub(submissionResult.attempt.id));
     } catch (error) {
-      setErrorMessage(error.message || "GitHub에 저장하지 못했습니다.");
+      setErrorMessage(error.message || text.githubFailed);
     } finally {
       setIsPublishing(false);
     }
@@ -102,10 +124,10 @@ function ProblemWorkspacePage() {
     return (
       <div className="lab-page lab-page--narrow">
         <section className="large-empty">
-          <strong>문제를 찾을 수 없습니다.</strong>
-          <span>코드를 업로드해 새로운 AI 문제를 만들어 주세요.</span>
+          <strong>{text.notFound}</strong>
+          <span>{text.notFoundHelp}</span>
           <Link className="lab-primary-link" to="/problems/new">
-            ＋ AI 문제 만들기
+            {text.createAi}
           </Link>
         </section>
       </div>
@@ -115,9 +137,9 @@ function ProblemWorkspacePage() {
   return (
     <div className="workspace-page">
       <div className="workspace-breadcrumb">
-        <Link to="/problems">Java 문제</Link>
+        <Link to="/problems">{text.javaProblems}</Link>
         <span>›</span>
-        <span>{problem.grammarName || "코딩 테스트"}</span>
+        <span>{text.categories[problem.grammarName] || problem.grammarName || text.codingTest}</span>
         <span>›</span>
         <strong>{problem.title}</strong>
       </div>
@@ -138,7 +160,7 @@ function ProblemWorkspacePage() {
                         : "medium")
                   }
                 >
-                  {problem.difficulty}
+                  {text.difficulty[problem.difficulty] || problem.difficulty}
                 </span>
               </div>
 
@@ -148,12 +170,12 @@ function ProblemWorkspacePage() {
 
           <section className="problem-statement problem-detail-card">
             <div className="problem-detail-card__description">
-              <strong>문제 설명</strong>
+              <strong>{text.description}</strong>
               <p>{problem.description}</p>
             </div>
 
             <div className="problem-detail-card__requirements">
-              <strong>제약 조건</strong>
+              <strong>{text.requirements}</strong>
               <ul>
                 {problem.requirements.map((requirement) => (
                   <li key={requirement}>{requirement}</li>
@@ -162,21 +184,21 @@ function ProblemWorkspacePage() {
             </div>
 
             <div className="example-block">
-              <strong>입력 예시</strong>
+              <strong>{text.inputExample}</strong>
               <pre>{problem.inputExample}</pre>
             </div>
 
             <div className="example-block">
-              <strong>출력 예시</strong>
+              <strong>{text.outputExample}</strong>
               <pre>{problem.outputExample}</pre>
             </div>
 
             <div className="workspace-writing-guide">
-              <strong>코드 작성 안내</strong>
+              <strong>{text.guide}</strong>
               <p>
                 {problem.methodName
-                  ? "기본 Solution 클래스는 그대로 두고 solution 메서드 내부의 TODO와 return 부분만 수정해 주세요. 입력·출력 코드는 서버가 자동으로 처리합니다."
-                  : "기본으로 제공되는 Main 클래스와 main 메서드는 그대로 두고 solution 메서드 내부만 수정해 주세요."}
+                  ? text.methodGuide
+                  : text.mainGuide}
               </p>
             </div>
           </section>
@@ -194,7 +216,7 @@ function ProblemWorkspacePage() {
               disabled={isSubmitting}
               onClick={handleSubmit}
             >
-              {isSubmitting ? "Java 코드를 실행하고 있습니다..." : "▷ 코드 실행"}
+              {isSubmitting ? text.running : text.run}
             </button>
 
             <button
@@ -206,7 +228,7 @@ function ProblemWorkspacePage() {
                 setSubmissionResult(null);
               }}
             >
-              ↻ 코드 초기화
+              {text.reset}
             </button>
           </div>
         </div>
@@ -218,7 +240,7 @@ function ProblemWorkspacePage() {
 
           <section className="feedback-card">
             <div className="feedback-card__header">
-              <h2>실행 결과</h2>
+              <h2>{text.result}</h2>
               {submissionResult && (
                 <span
                   className={
@@ -227,14 +249,14 @@ function ProblemWorkspacePage() {
                       : "result-pill result-pill--failed"
                   }
                 >
-                  {submissionResult.status === "passed" ? "성공" : "실패"}
+                  {submissionResult.status === "passed" ? text.success : text.failure}
                 </span>
               )}
             </div>
 
             {!submissionResult ? (
               <div className="compact-empty">
-                코드를 실행하면 테스트 케이스별 실제 출력과 통과 여부가 표시됩니다.
+                {text.resultEmpty}
               </div>
             ) : (
               <div className="workspace-result-content">
@@ -242,29 +264,29 @@ function ProblemWorkspacePage() {
                   <b>{submissionResult.status === "passed" ? "✓" : "!"}</b>
                   <strong>
                     {submissionResult.status === "passed"
-                      ? "모든 테스트 케이스를 통과했습니다!"
-                      : "통과하지 못한 테스트 케이스가 있습니다."}
+                      ? text.allPassed
+                      : text.someFailed}
                   </strong>
                 </div>
                 {submissionResult.hint && (
                   <article className="feedback-box feedback-box--hint">
-                    <strong>☼ 힌트</strong>
+                    <strong>{text.hint}</strong>
                     <p>{submissionResult.hint}</p>
                   </article>
                 )}
 
                 <article className="feedback-box feedback-box--improvement">
-                  <strong>ⓘ 보완할 점</strong>
+                  <strong>{text.improvement}</strong>
                   <p>{submissionResult.improvement}</p>
                 </article>
                 {submissionResult.status === "passed" && (
                   <article className="feedback-box github-publish-box">
-                    <strong>GitHub 학습 기록</strong>
+                    <strong>{text.githubLearning}</strong>
                     {githubResult ? (
-                      <a href={githubResult.commitUrl} target="_blank" rel="noreferrer">커밋 확인하기</a>
+                      <a href={githubResult.commitUrl} target="_blank" rel="noreferrer">{text.viewCommit}</a>
                     ) : (
                       <button type="button" onClick={handleGitHubPublish} disabled={isPublishing}>
-                        {isPublishing ? "GitHub에 저장하고 있습니다..." : "GitHub에 저장"}
+                        {isPublishing ? text.savingGithub : text.saveGithub}
                       </button>
                     )}
                   </article>

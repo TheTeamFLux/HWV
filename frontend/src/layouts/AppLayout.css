@@ -1,6 +1,6 @@
 .lab-shell {
   min-height: 100vh;
-  background: #fffaf3;
+  background: var(--color-background);
 }
 
 .lab-header {
@@ -184,7 +184,7 @@
   min-height: 100vh;
   padding-top: 68px;
   padding-left: 240px;
-  background: #fffaf3;
+  background: var(--color-background);
 }
 
 @media (max-width: 850px) {
