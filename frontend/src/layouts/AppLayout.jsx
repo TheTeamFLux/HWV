@@ -10,7 +10,7 @@ import "./AppLayout.css";
 
 function AppLayout() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [currentProblem, setCurrentProblem] = useState(null);
   const user = getSessionUser();
   const displayName = user?.name || "User";
@@ -24,11 +24,11 @@ function AppLayout() {
 
   useEffect(() => {
     let active = true;
-    getProblems().then((problems) => {
+    getProblems(language).then((problems) => {
       if (active) setCurrentProblem(problems.find((problem) => problem.progress > 0) || null);
     }).catch(() => { if (active) setCurrentProblem(null); });
     return () => { active = false; };
-  }, []);
+  }, [language]);
 
   return (
     <div className="lab-shell">

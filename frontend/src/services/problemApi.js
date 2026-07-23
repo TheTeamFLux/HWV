@@ -14,12 +14,12 @@ async function request(endpoint, options = {}) {
   return result;
 }
 
-export function getProblems() {
-  return request(`/api/problems?userId=${getUserId()}`);
+export function getProblems(language = getSavedLanguage()) {
+  return request(`/api/problems?userId=${getUserId()}&language=${encodeURIComponent(language)}`);
 }
 
-export function getProblem(problemId) {
-  return request(`/api/problems/${problemId}?userId=${getUserId()}`);
+export function getProblem(problemId, language = getSavedLanguage()) {
+  return request(`/api/problems/${problemId}?userId=${getUserId()}&language=${encodeURIComponent(language)}`);
 }
 
 export function submitSolution({ problemId, sourceCode }) {

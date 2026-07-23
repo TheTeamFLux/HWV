@@ -21,7 +21,7 @@ function ProblemListPage() {
   useEffect(() => {
     let active = true;
 
-    getProblems().then((result) => {
+    getProblems(language).then((result) => {
       if (!active) return;
 
       if (result.length === 0) {
@@ -37,7 +37,7 @@ function ProblemListPage() {
     return () => {
       active = false;
     };
-  }, [navigate]);
+  }, [navigate, language]);
 
   const categories = ["전체", ...new Set(problems.map((item) => item.category))];
   const visibleProblems =

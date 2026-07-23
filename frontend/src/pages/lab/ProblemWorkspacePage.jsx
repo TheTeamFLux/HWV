@@ -53,7 +53,7 @@ function ProblemWorkspacePage() {
   useEffect(() => {
     let active = true;
 
-    getProblem(problemId)
+    getProblem(problemId, uiLanguage)
       .then((result) => {
         if (active && result) {
           setProblem(result);
@@ -77,7 +77,7 @@ function ProblemWorkspacePage() {
     return () => {
       active = false;
     };
-  }, [problemId]);
+  }, [problemId, uiLanguage]);
 
   async function handleSubmit() {
     if (!problem || !sourceCode.trim()) {

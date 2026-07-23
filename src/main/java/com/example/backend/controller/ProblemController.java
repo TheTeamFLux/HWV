@@ -14,9 +14,15 @@ public class ProblemController {
     @PostMapping("/projects/problems")
     public List<Map<String, Object>> generate(@RequestBody CodingProblemRequest request) { return problemService.generate(request); }
     @GetMapping("/problems")
-    public List<Map<String, Object>> problems(@RequestParam Long userId) { return problemService.findAll(userId); }
+    public List<Map<String, Object>> problems(@RequestParam Long userId,
+                                               @RequestParam(defaultValue = "ko") String language) {
+        return problemService.findAll(userId, language);
+    }
     @GetMapping("/problems/{id}")
-    public Map<String, Object> problem(@PathVariable Long id, @RequestParam Long userId) { return problemService.findOne(id, userId); }
+    public Map<String, Object> problem(@PathVariable Long id, @RequestParam Long userId,
+                                       @RequestParam(defaultValue = "ko") String language) {
+        return problemService.findOne(id, userId, language);
+    }
     @PostMapping("/submissions")
     public Map<String, Object> submit(@RequestBody CodingSubmissionRequest request) { return problemService.review(request); }
 }
