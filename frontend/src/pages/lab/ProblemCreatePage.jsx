@@ -42,7 +42,7 @@ function ProblemCreatePage() {
     finally { setIsAnalyzing(false); }
   }
 
-  return <div className="lab-page lab-page--narrow">
+  return <div className="lab-page lab-page--narrow problem-create-page">
     <div className="lab-page__heading"><div><span className="lab-page__eyebrow">{text.eyebrow}</span><h1>{text.title}</h1><p>{text.subtitle}</p></div></div>
     <form className="creation-card" onSubmit={handleAnalyze}>
       <section>

@@ -2044,6 +2044,30 @@
   border-color: #efc9a8;
 }
 
+.problem-create-page,
+.problem-create-page .creation-card {
+  background: transparent;
+  background-image: none;
+}
+
+.problem-create-page .project-dropzone,
+.problem-create-page .selected-project,
+.problem-create-page .difficulty-field--creation {
+  background: #fffdf9;
+  background-image: none;
+  box-shadow: none;
+}
+
+.problem-create-page .creation-analyze-button {
+  background: var(--color-primary);
+  background-image: none;
+  box-shadow: none;
+}
+
+.problem-create-page .creation-analyze-button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
 .selected-project,
 .difficulty-option--active,
 .java-quiz-options label:has(input:checked),
