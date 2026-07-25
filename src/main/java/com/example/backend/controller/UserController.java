@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.entity.User;
 import com.example.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.GoogleLoginRequest;
@@ -22,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public Map<String, String> register(@RequestBody RegisterRequest request) {
+    public Map<String, String> register(@Valid @RequestBody RegisterRequest request) {
 
         User user = new User();
         user.setEmail(request.getEmail());
@@ -34,7 +35,7 @@ public class UserController {
         return Map.of("message", "회원가입 성공!");
     }
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody LoginRequest request) {
+    public Map<String, Object> login(@Valid @RequestBody LoginRequest request) {
 
         User user = userService.login(
                 request.getEmail(),

@@ -87,9 +87,11 @@ public class ProblemGenerationService {
         CodingProblem problem = problemRepository.findByIdAndUser(request.getProblemId(), user).orElseThrow(() -> new IllegalArgumentException("문제를 찾을 수 없습니다."));
         CodingReviewResponse review = executionService.execute(toDraft(problem), request.getSourceCode());
         int passedCount = (int) review.tests().stream().filter(test -> "passed".equals(test.status())).count();
+        int totalCount = review.tests().size();
         CodingSubmission submission = new CodingSubmission(); submission.setUser(user); submission.setProblem(problem);
         submission.setSourceCode(request.getSourceCode()); submission.setTestsJson(write(review.tests())); submission.setHint(review.hint());
-        submission.setImprovement(review.improvement()); submission.setPassedCount(passedCount); submission.setTotalCount(3); submission.setPassed(passedCount == 3);
+        submission.setImprovement(review.improvement()); submission.setPassedCount(passedCount); submission.setTotalCount(totalCount);
+        submission.setPassed(totalCount > 0 && passedCount == totalCount);
         submissionRepository.save(submission);
         studyStreakService.recordSubmission(user.getId(), submission.isPassed());
         Map<String, Object> result = new LinkedHashMap<>(); result.put("status", submission.isPassed() ? "passed" : "failed");

@@ -4,22 +4,29 @@ import com.example.backend.dto.CodingProblemDraft;
 import com.example.backend.dto.CodingReviewResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 public class JavaCodeExecutionService {
+    private static final Logger log = LoggerFactory.getLogger(JavaCodeExecutionService.class);
     private static final long COMPILE_TIMEOUT_SECONDS = 10;
     private static final long RUN_TIMEOUT_SECONDS = 3;
     private static final int MAX_SOURCE_LENGTH = 50_000;
@@ -69,6 +76,9 @@ public class JavaCodeExecutionService {
             if (compilation.timedOut()) {
                 return failedAll(problem, "컴파일 시간이 초과되었습니다.", compilation.output());
             }
+            if (compilation.outputExceeded()) {
+                return failedAll(problem, "컴파일 출력 제한을 초과했습니다.", compilation.output());
+            }
             if (memoryLimitExceeded(compilation)) {
                 throw memoryLimitException();
             }
@@ -85,11 +95,14 @@ public class JavaCodeExecutionService {
                 String actual = execution.output().trim();
                 String expected = test.expected().trim();
                 boolean passed = !execution.timedOut()
+                    && !execution.outputExceeded()
                     && execution.exitCode() == 0
                     && normalize(actual).equals(normalize(expected));
                 String reason = passed
                     ? "실제 실행 결과가 기대 출력과 일치합니다."
-                    : execution.timedOut()
+                    : execution.outputExceeded()
+                        ? "출력 제한 32KB를 초과했습니다. 불필요하거나 반복되는 출력을 줄여 주세요."
+                        : execution.timedOut()
                         ? "실행 제한 시간 3초를 초과했습니다."
                         : execution.exitCode() != 0
                             ? friendlyExecutionError(execution)
@@ -100,7 +113,8 @@ public class JavaCodeExecutionService {
                 ));
             }
 
-            boolean allPassed = results.stream().allMatch(test -> "passed".equals(test.status()));
+            boolean allPassed = !results.isEmpty()
+                && results.stream().allMatch(test -> "passed".equals(test.status()));
             return new CodingReviewResponse(
                 allPassed ? "passed" : "failed",
                 allPassed ? "모든 테스트를 통과했습니다." : "입력 처리와 출력 형식을 다시 확인해 주세요.",
@@ -127,6 +141,7 @@ public class JavaCodeExecutionService {
                 workDirectory, "", COMPILE_TIMEOUT_SECONDS
             );
             if (compilation.timedOut()) return failedAll(problem, "컴파일 시간이 초과되었습니다.", compilation.output());
+            if (compilation.outputExceeded()) return failedAll(problem, "컴파일 출력 제한을 초과했습니다.", compilation.output());
             if (memoryLimitExceeded(compilation)) throw memoryLimitException();
             if (compilation.exitCode() != 0) return failedAll(problem, "solution 메서드의 컴파일 오류를 수정해 주세요.", compilation.output());
 
@@ -138,16 +153,18 @@ public class JavaCodeExecutionService {
                     workDirectory, "", RUN_TIMEOUT_SECONDS
                 );
                 String actual = execution.output().trim();
-                boolean passed = !execution.timedOut() && execution.exitCode() == 0
+                boolean passed = !execution.timedOut() && !execution.outputExceeded() && execution.exitCode() == 0
                     && normalize(actual).equals(normalize(test.expected().trim()));
                 String reason = passed ? "solution 반환값이 기대값과 일치합니다."
+                    : execution.outputExceeded() ? "출력 제한 32KB를 초과했습니다. 불필요하거나 반복되는 출력을 줄여 주세요."
                     : execution.timedOut() ? "실행 제한 시간 3초를 초과했습니다."
                     : execution.exitCode() != 0 ? friendlyExecutionError(execution)
                     : "solution 반환값이 기대값과 다릅니다.";
                 results.add(new CodingReviewResponse.TestResult(test.id(), test.name(), passed ? "passed" : "failed",
                     test.input(), test.expected(), actual, reason));
             }
-            boolean allPassed = results.stream().allMatch(test -> "passed".equals(test.status()));
+            boolean allPassed = !results.isEmpty()
+                && results.stream().allMatch(test -> "passed".equals(test.status()));
             return new CodingReviewResponse(allPassed ? "passed" : "failed",
                 allPassed ? "모든 테스트를 통과했습니다." : "실패한 테스트의 반환값을 확인해 주세요.",
                 allPassed ? "solution 반환값이 모든 기대값과 일치합니다."
@@ -238,10 +255,20 @@ public class JavaCodeExecutionService {
     }
 
     private ProcessResult runProcess(List<String> command, Path directory, String input, long timeoutSeconds) throws IOException {
-        Process process = new ProcessBuilder(command)
+        ProcessBuilder builder = new ProcessBuilder(command)
             .directory(directory.toFile())
-            .redirectErrorStream(true)
-            .start();
+            .redirectErrorStream(true);
+        applySafeEnvironment(builder.environment());
+        Process process = builder.start();
+        ByteArrayOutputStream capturedOutput = new ByteArrayOutputStream();
+        AtomicBoolean outputExceeded = new AtomicBoolean(false);
+        Thread outputReader = new Thread(
+            () -> drainOutput(process, capturedOutput, outputExceeded),
+            "hwv-java-output-reader"
+        );
+        outputReader.setDaemon(true);
+        outputReader.start();
+
         process.getOutputStream().write(input.getBytes(StandardCharsets.UTF_8));
         process.getOutputStream().close();
 
@@ -250,19 +277,60 @@ public class JavaCodeExecutionService {
             finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            process.destroyForcibly();
+            destroyProcessTree(process);
             throw new IllegalStateException("Java 실행이 중단되었습니다.", exception);
         }
-        if (!finished) process.destroyForcibly();
+        if (!finished) destroyProcessTree(process);
         try {
             process.waitFor(1, TimeUnit.SECONDS);
+            outputReader.join(1_000);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
-        byte[] output = process.getInputStream().readNBytes(MAX_OUTPUT_BYTES + 1);
-        String text = new String(output, 0, Math.min(output.length, MAX_OUTPUT_BYTES), StandardCharsets.UTF_8);
-        if (output.length > MAX_OUTPUT_BYTES) text += "\n[출력이 너무 길어 중단되었습니다.]";
-        return new ProcessResult(finished ? process.exitValue() : -1, text, !finished);
+        String text = capturedOutput.toString(StandardCharsets.UTF_8);
+        if (outputExceeded.get()) text += "\n[출력이 너무 길어 실행을 중단했습니다.]";
+        int exitCode = process.isAlive() ? -1 : process.exitValue();
+        return new ProcessResult(exitCode, text, !finished && !outputExceeded.get(), outputExceeded.get());
+    }
+
+    private void drainOutput(Process process, ByteArrayOutputStream output, AtomicBoolean outputExceeded) {
+        try (InputStream stream = process.getInputStream()) {
+            byte[] buffer = new byte[4_096];
+            int read;
+            while ((read = stream.read(buffer)) != -1) {
+                int remaining = MAX_OUTPUT_BYTES - output.size();
+                if (remaining > 0) output.write(buffer, 0, Math.min(read, remaining));
+                if (read > remaining) {
+                    outputExceeded.set(true);
+                    destroyProcessTree(process);
+                    return;
+                }
+            }
+        } catch (IOException exception) {
+            if (!outputExceeded.get() && process.isAlive()) {
+                log.debug("사용자 코드 출력 스트림을 읽지 못했습니다.", exception);
+            }
+        }
+    }
+
+    private void applySafeEnvironment(Map<String, String> environment) {
+        Map<String, String> current = System.getenv();
+        environment.clear();
+        for (String key : List.of("SystemRoot", "WINDIR", "TEMP", "TMP")) {
+            String value = current.get(key);
+            if (value != null && !value.isBlank()) environment.put(key, value);
+        }
+    }
+
+    private void destroyProcessTree(Process process) {
+        process.descendants().forEach(handle -> {
+            try {
+                handle.destroyForcibly();
+            } catch (RuntimeException exception) {
+                log.debug("사용자 코드 하위 프로세스를 종료하지 못했습니다.", exception);
+            }
+        });
+        process.destroyForcibly();
     }
 
     private CodingReviewResponse failedAll(CodingProblemDraft problem, String message, String actual) {
@@ -373,10 +441,16 @@ public class JavaCodeExecutionService {
         if (directory == null || !Files.exists(directory)) return;
         try (var paths = Files.walk(directory)) {
             paths.sorted(Comparator.reverseOrder()).forEach(path -> {
-                try { Files.deleteIfExists(path); } catch (IOException ignored) { }
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException exception) {
+                    log.warn("임시 Java 실행 파일을 삭제하지 못했습니다: {}", path, exception);
+                }
             });
-        } catch (IOException ignored) { }
+        } catch (IOException exception) {
+            log.warn("임시 Java 실행 디렉터리를 정리하지 못했습니다: {}", directory, exception);
+        }
     }
 
-    private record ProcessResult(int exitCode, String output, boolean timedOut) { }
+    private record ProcessResult(int exitCode, String output, boolean timedOut, boolean outputExceeded) { }
 }

@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,11 +17,14 @@ import java.util.UUID;
 @Service
 public class GoogleAuthService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final String clientId;
 
     public GoogleAuthService(UserRepository userRepository,
+                             PasswordEncoder passwordEncoder,
                              @Value("${google.client-id:}") String clientId) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.clientId = clientId;
     }
 
@@ -58,7 +62,7 @@ public class GoogleAuthService {
                 }
                 if (user.getEmail() == null) {
                     user.setEmail(email);
-                    user.setPassword("GOOGLE_" + UUID.randomUUID());
+                    user.setPassword(passwordEncoder.encode("GOOGLE_" + UUID.randomUUID()));
                 }
                 user.setName(name);
                 user.setGoogleSubject(subject);
