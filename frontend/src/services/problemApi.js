@@ -10,7 +10,12 @@ async function request(endpoint, options = {}) {
   });
   const contentType = response.headers.get("content-type") || "";
   const result = contentType.includes("application/json") ? await response.json() : await response.text();
-  if (!response.ok) throw new Error(result?.message || result?.error || result || "요청 처리 중 오류가 발생했습니다.");
+  if (!response.ok) {
+    const error = new Error(result?.message || result?.error || result || "요청 처리 중 오류가 발생했습니다.");
+    error.status = response.status;
+    error.retryAfter = response.headers.get("retry-after");
+    throw error;
+  }
   return result;
 }
 

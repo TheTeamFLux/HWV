@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.service.CodeExecutionUnavailableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,14 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> badRequest(IllegalArgumentException exception) {
         return Map.of("message", exception.getMessage());
+    }
+
+    @ExceptionHandler(CodeExecutionUnavailableException.class)
+    public ResponseEntity<Map<String, String>> codeExecutionUnavailable(CodeExecutionUnavailableException exception) {
+        log.warn("코드 실행 요청을 처리할 수 없음: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .header("Retry-After", "5")
+            .body(Map.of("message", exception.getMessage()));
     }
 
     @ExceptionHandler(IllegalStateException.class)

@@ -13,18 +13,21 @@ const workspaceCopy = {
     javaProblems: "Java 문제", codingTest: "코딩 테스트", notFound: "문제를 찾을 수 없습니다.", notFoundHelp: "코드를 업로드해 새로운 AI 문제를 만들어 주세요.", createAi: "＋ AI 문제 만들기",
     description: "문제 설명", requirements: "제약 조건", inputExample: "입력 예시", outputExample: "출력 예시", guide: "코드 작성 안내", methodGuide: "기본 Solution 클래스는 그대로 두고 solution 메서드 내부의 TODO와 return 부분만 수정해 주세요. 입력·출력 코드는 서버가 자동으로 처리합니다.", mainGuide: "기본으로 제공되는 Main 클래스와 main 메서드는 그대로 두고 solution 메서드 내부만 수정해 주세요.",
     running: "Java 코드를 실행하고 있습니다...", run: "▷ 코드 실행", reset: "↻ 코드 초기화", runFailed: "Java 코드 실행에 실패했습니다.", githubFailed: "GitHub에 저장하지 못했습니다.", result: "실행 결과", success: "성공", failure: "실패", resultEmpty: "코드를 실행하면 테스트 케이스별 실제 출력과 통과 여부가 표시됩니다.", allPassed: "모든 테스트 케이스를 통과했습니다!", someFailed: "통과하지 못한 테스트 케이스가 있습니다.", hint: "☼ 힌트", improvement: "ⓘ 보완할 점", githubLearning: "GitHub 학습 기록", viewCommit: "커밋 확인하기", savingGithub: "GitHub에 저장하고 있습니다...", saveGithub: "GitHub에 저장",
+    serverBusy: "현재 다른 코드를 실행 중이거나 실행 메모리가 부족합니다. 잠시 후 다시 시도해 주세요.",
     difficulty: { "쉬움": "쉬움", "보통": "보통", "어려움": "어려움" }, categories: { "메서드 선언": "메서드 선언", "조건문": "조건문", "for문": "for문", "클래스 선언": "클래스 선언", "배열": "배열" },
   },
   en: {
     javaProblems: "Java Problems", codingTest: "Coding Test", notFound: "Problem not found.", notFoundHelp: "Upload code to create new AI problems.", createAi: "＋ Create AI Problems",
     description: "Description", requirements: "Constraints", inputExample: "Input Example", outputExample: "Output Example", guide: "Coding Guide", methodGuide: "Keep the provided Solution class and edit only the TODO and return statement inside the solution method. The server handles input and output automatically.", mainGuide: "Keep the provided Main class and main method, and edit only the inside of the solution method.",
     running: "Running Java code...", run: "▷ Run Code", reset: "↻ Reset Code", runFailed: "Failed to run the Java code.", githubFailed: "Failed to save to GitHub.", result: "Result", success: "Passed", failure: "Failed", resultEmpty: "Run your code to see the actual output and pass status for each test case.", allPassed: "All test cases passed!", someFailed: "Some test cases did not pass.", hint: "☼ Hint", improvement: "ⓘ What to Improve", githubLearning: "GitHub Learning Record", viewCommit: "View Commit", savingGithub: "Saving to GitHub...", saveGithub: "Save to GitHub",
+    serverBusy: "Another code run is in progress or execution memory is temporarily unavailable. Please try again shortly.",
     difficulty: { "쉬움": "Easy", "보통": "Medium", "어려움": "Hard" }, categories: { "메서드 선언": "Method", "조건문": "Conditionals", "for문": "For Loop", "클래스 선언": "Class", "배열": "Array" },
   },
   ja: {
     javaProblems: "Java問題", codingTest: "コーディングテスト", notFound: "問題が見つかりません。", notFoundHelp: "コードをアップロードして新しいAI問題を作成してください。", createAi: "＋ AI問題を作る",
     description: "問題説明", requirements: "制約条件", inputExample: "入力例", outputExample: "出力例", guide: "作成ガイド", methodGuide: "基本のSolutionクラスはそのままにして、solutionメソッド内のTODOとreturn部分のみ修正してください。入出力はサーバーが自動処理します。", mainGuide: "基本のMainクラスとmainメソッドはそのままにして、solutionメソッドの内部のみ修正してください。",
     running: "Javaコードを実行しています...", run: "▷ コード実行", reset: "↻ コード初期化", runFailed: "Javaコードを実行できませんでした。", githubFailed: "GitHubに保存できませんでした。", result: "実行結果", success: "成功", failure: "失敗", resultEmpty: "コードを実行すると、各テストケースの実際の出力と合否が表示されます。", allPassed: "すべてのテストケースに合格しました！", someFailed: "合格していないテストケースがあります。", hint: "☼ ヒント", improvement: "ⓘ 改善点", githubLearning: "GitHub学習記録", viewCommit: "コミットを確認", savingGithub: "GitHubに保存しています...", saveGithub: "GitHubに保存",
+    serverBusy: "別のコードを実行中か、実行用メモリが一時的に不足しています。しばらくしてから再試行してください。",
     difficulty: { "쉬움": "簡単", "보통": "普通", "어려움": "難しい" }, categories: { "메서드 선언": "メソッド宣言", "조건문": "条件文", "for문": "for文", "클래스 선언": "クラス宣言", "배열": "配列" },
   },
 };
@@ -98,7 +101,7 @@ function ProblemWorkspacePage() {
       setTests(result.tests);
       setSubmissionResult(result);
     } catch (error) {
-      setErrorMessage(error.message || text.runFailed);
+      setErrorMessage(error.status === 503 ? text.serverBusy : (error.message || text.runFailed));
     } finally {
       setIsSubmitting(false);
     }

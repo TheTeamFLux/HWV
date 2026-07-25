@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,18 +24,35 @@ public class JavaCodeExecutionService {
     private static final long RUN_TIMEOUT_SECONDS = 3;
     private static final int MAX_SOURCE_LENGTH = 50_000;
     private static final int MAX_OUTPUT_BYTES = 32_768;
+    private static final long EXECUTION_SLOT_WAIT_SECONDS = 2;
     private static final Pattern MAIN_CLASS = Pattern.compile("\\bpublic\\s+class\\s+Main\\b");
     private static final Pattern SOLUTION_CLASS = Pattern.compile("\\bpublic\\s+class\\s+Solution\\b");
     private static final Pattern BLOCKED_API = Pattern.compile(
         "\\b(package|ProcessBuilder|Runtime\\s*\\.|System\\s*\\.\\s*(exit|getenv|getProperties|getProperty|load|loadLibrary)|java\\s*\\.\\s*(io|nio|net|lang\\s*\\.\\s*reflect)|ClassLoader)\\b"
     );
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Semaphore executionSlot = new Semaphore(1, true);
 
     public CodingReviewResponse execute(CodingProblemDraft problem, String sourceCode) {
-        if (problem.methodName() != null && !problem.methodName().isBlank()) {
-            return executeSolution(problem, sourceCode);
+        boolean acquired;
+        try {
+            acquired = executionSlot.tryAcquire(EXECUTION_SLOT_WAIT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new CodeExecutionUnavailableException("코드 실행 대기가 중단되었습니다. 잠시 후 다시 시도해 주세요.", exception);
         }
-        return executeMain(problem, sourceCode);
+        if (!acquired) {
+            throw new CodeExecutionUnavailableException("현재 다른 코드를 실행하고 있습니다. 잠시 후 다시 시도해 주세요.");
+        }
+
+        try {
+            if (problem.methodName() != null && !problem.methodName().isBlank()) {
+                return executeSolution(problem, sourceCode);
+            }
+            return executeMain(problem, sourceCode);
+        } finally {
+            executionSlot.release();
+        }
     }
 
     private CodingReviewResponse executeMain(CodingProblemDraft problem, String sourceCode) {
@@ -45,11 +63,14 @@ public class JavaCodeExecutionService {
             Files.writeString(workDirectory.resolve("Main.java"), sourceCode, StandardCharsets.UTF_8);
 
             ProcessResult compilation = runProcess(
-                List.of(javaCommand("javac"), "-encoding", "UTF-8", "Main.java"),
+                compilerCommand("Main.java"),
                 workDirectory, "", COMPILE_TIMEOUT_SECONDS
             );
             if (compilation.timedOut()) {
                 return failedAll(problem, "컴파일 시간이 초과되었습니다.", compilation.output());
+            }
+            if (memoryLimitExceeded(compilation)) {
+                throw memoryLimitException();
             }
             if (compilation.exitCode() != 0) {
                 return failedAll(problem, "컴파일 오류를 수정해 주세요.", compilation.output());
@@ -58,7 +79,7 @@ public class JavaCodeExecutionService {
             List<CodingReviewResponse.TestResult> results = new ArrayList<>();
             for (CodingProblemDraft.TestCase test : problem.tests()) {
                 ProcessResult execution = runProcess(
-                    List.of(javaCommand("java"), "-Xmx64m", "-XX:MaxMetaspaceSize=64m", "-cp", ".", "Main"),
+                    runtimeCommand("Main"),
                     workDirectory, test.input(), RUN_TIMEOUT_SECONDS
                 );
                 String actual = execution.output().trim();
@@ -71,7 +92,7 @@ public class JavaCodeExecutionService {
                     : execution.timedOut()
                         ? "실행 제한 시간 3초를 초과했습니다."
                         : execution.exitCode() != 0
-                            ? friendlyExecutionError(execution.output())
+                            ? friendlyExecutionError(execution)
                             : "실제 출력이 기대 출력과 다릅니다.";
                 results.add(new CodingReviewResponse.TestResult(
                     test.id(), test.name(), passed ? "passed" : "failed",
@@ -102,17 +123,18 @@ public class JavaCodeExecutionService {
             Files.writeString(workDirectory.resolve("Solution.java"), sourceCode, StandardCharsets.UTF_8);
             Files.writeString(workDirectory.resolve("Main.java"), buildHarness(problem), StandardCharsets.UTF_8);
             ProcessResult compilation = runProcess(
-                List.of(javaCommand("javac"), "-encoding", "UTF-8", "Solution.java", "Main.java"),
+                compilerCommand("Solution.java", "Main.java"),
                 workDirectory, "", COMPILE_TIMEOUT_SECONDS
             );
             if (compilation.timedOut()) return failedAll(problem, "컴파일 시간이 초과되었습니다.", compilation.output());
+            if (memoryLimitExceeded(compilation)) throw memoryLimitException();
             if (compilation.exitCode() != 0) return failedAll(problem, "solution 메서드의 컴파일 오류를 수정해 주세요.", compilation.output());
 
             List<CodingReviewResponse.TestResult> results = new ArrayList<>();
             for (int index = 0; index < problem.tests().size(); index++) {
                 CodingProblemDraft.TestCase test = problem.tests().get(index);
                 ProcessResult execution = runProcess(
-                    List.of(javaCommand("java"), "-Xmx64m", "-XX:MaxMetaspaceSize=64m", "-cp", ".", "Main", String.valueOf(index)),
+                    runtimeCommand("Main", String.valueOf(index)),
                     workDirectory, "", RUN_TIMEOUT_SECONDS
                 );
                 String actual = execution.output().trim();
@@ -120,7 +142,7 @@ public class JavaCodeExecutionService {
                     && normalize(actual).equals(normalize(test.expected().trim()));
                 String reason = passed ? "solution 반환값이 기대값과 일치합니다."
                     : execution.timedOut() ? "실행 제한 시간 3초를 초과했습니다."
-                    : execution.exitCode() != 0 ? friendlyExecutionError(execution.output())
+                    : execution.exitCode() != 0 ? friendlyExecutionError(execution)
                     : "solution 반환값이 기대값과 다릅니다.";
                 results.add(new CodingReviewResponse.TestResult(test.id(), test.name(), passed ? "passed" : "failed",
                     test.input(), test.expected(), actual, reason));
@@ -267,7 +289,11 @@ public class JavaCodeExecutionService {
         return location + (fallback == null || fallback.isBlank() ? "컴파일 오류가 발생했습니다. 표시된 줄의 문법과 타입을 확인해 주세요." : fallback);
     }
 
-    private String friendlyExecutionError(String output) {
+    private String friendlyExecutionError(ProcessResult result) {
+        if (memoryLimitExceeded(result)) {
+            return "코드 실행 메모리 제한을 초과했습니다. 배열 크기나 반복적인 객체 생성을 줄인 뒤 다시 시도해 주세요.";
+        }
+        String output = result.output();
         String lower = output == null ? "" : output.toLowerCase();
         if (lower.contains("numberformatexception")) return "문자열을 숫자로 변환할 수 없습니다. 입력값과 숫자 변환 코드를 확인해 주세요.";
         if (lower.contains("arrayindexoutofboundsexception") || lower.contains("indexoutofboundsexception")) return "배열이나 목록의 범위를 벗어난 위치에 접근했습니다. 반복문의 시작값과 종료 조건을 확인해 주세요.";
@@ -277,6 +303,51 @@ public class JavaCodeExecutionService {
         if (lower.contains("outofmemoryerror")) return "실행 중 사용할 수 있는 메모리를 초과했습니다. 너무 큰 배열이나 반복적인 객체 생성을 확인해 주세요.";
         if (lower.contains("classcastexception")) return "서로 호환되지 않는 타입으로 변환했습니다. 형 변환 대상의 실제 타입을 확인해 주세요.";
         return "실행 중 오류가 발생했습니다. 배열 범위, null 값, 숫자 연산과 반복 조건을 확인해 주세요.";
+    }
+
+    private List<String> compilerCommand(String... sourceFiles) {
+        List<String> command = new ArrayList<>(List.of(
+            javaCommand("javac"),
+            "-J-Xms16m",
+            "-J-Xmx64m",
+            "-J-XX:MaxMetaspaceSize=64m",
+            "-J-XX:+UseSerialGC",
+            "-J-XX:+ExitOnOutOfMemoryError",
+            "-encoding",
+            "UTF-8"
+        ));
+        command.addAll(List.of(sourceFiles));
+        return command;
+    }
+
+    private List<String> runtimeCommand(String mainClass, String... arguments) {
+        List<String> command = new ArrayList<>(List.of(
+            javaCommand("java"),
+            "-Xms16m",
+            "-Xmx64m",
+            "-XX:MaxMetaspaceSize=64m",
+            "-XX:+UseSerialGC",
+            "-XX:+ExitOnOutOfMemoryError",
+            "-cp",
+            ".",
+            mainClass
+        ));
+        command.addAll(List.of(arguments));
+        return command;
+    }
+
+    private boolean memoryLimitExceeded(ProcessResult result) {
+        String output = result.output() == null ? "" : result.output().toLowerCase();
+        return result.exitCode() == 137
+            || output.contains("outofmemoryerror")
+            || output.contains("cannot reserve enough space")
+            || output.contains("could not reserve enough space");
+    }
+
+    private CodeExecutionUnavailableException memoryLimitException() {
+        return new CodeExecutionUnavailableException(
+            "코드 실행에 사용할 수 있는 메모리가 부족합니다. 잠시 후 다시 시도해 주세요."
+        );
     }
 
     private String errorLine(String output) {
