@@ -30,6 +30,7 @@ public class QuizService {
         return getLatestQuiz(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<Quiz> getLatestQuiz(Long userId) {
         List<Quiz> quizzes = new ArrayList<>(quizRepository.findTop3ByUserOrderByCreatedAtDescIdDesc(user(userId)));
         Collections.reverse(quizzes);
@@ -55,26 +56,31 @@ public class QuizService {
         return Map.of("correctCount", correct, "wrongCount", request.getAnswers().size() - correct, "wrongAnswers", wrongAnswers);
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> dashboard(Long userId) {
         User user = user(userId); long generated = quizRepository.countByUser(user) + codingProblemRepository.countByUser(user);
         long correct = attemptRepository.countByUserAndCorrect(user, true) + codingSubmissionRepository.countByUserAndPassed(user, true);
         long wrong = attemptRepository.countByUserAndCorrect(user, false) + codingSubmissionRepository.countByUserAndPassed(user, false);
         long total = correct + wrong;
-        List<Map<String, Object>> codingRecent = codingSubmissionRepository.findByUserOrderBySubmittedAtDesc(user).stream().limit(4).map(this::codingAttemptMap).toList();
+        List<Map<String, Object>> codingRecent = codingSubmissionRepository.findTop4ByUserOrderBySubmittedAtDesc(user)
+            .stream().map(this::codingAttemptMap).toList();
         List<Map<String, Object>> recent = codingRecent.isEmpty()
-            ? attemptRepository.findByUserOrderByAnsweredAtDesc(user).stream().limit(4).map(this::attemptMap).toList() : codingRecent;
+            ? attemptRepository.findTop4ByUserOrderByAnsweredAtDesc(user).stream().map(this::attemptMap).toList() : codingRecent;
         Map<String, Object> result = new LinkedHashMap<>(); result.put("generatedProblems", generated); result.put("correctAnswers", correct);
         result.put("incorrectAnswers", wrong); result.put("accuracy", total == 0 ? 0 : Math.round(correct * 100.0 / total)); result.put("recentAttempts", recent);
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> wrongNotes(Long userId) {
         User user = user(userId);
-        List<Map<String, Object>> coding = codingSubmissionRepository.findByUserOrderBySubmittedAtDesc(user).stream()
-            .filter(item -> !item.isPassed()).map(this::codingAttemptMap).toList();
-        return coding.isEmpty() ? attemptRepository.findByUserOrderByAnsweredAtDesc(user).stream().filter(a -> !a.isCorrect()).map(this::attemptMap).toList() : coding;
+        List<Map<String, Object>> coding = codingSubmissionRepository.findByUserAndPassedFalseOrderBySubmittedAtDesc(user)
+            .stream().map(this::codingAttemptMap).toList();
+        return coding.isEmpty() ? attemptRepository.findByUserAndCorrectFalseOrderByAnsweredAtDesc(user)
+            .stream().map(this::attemptMap).toList() : coding;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> statistics(Long userId) {
         User user = user(userId); Map<String, Object> result = new LinkedHashMap<>(dashboard(userId));
         List<QuizAttempt> attempts = attemptRepository.findByUserOrderByAnsweredAtDesc(user);

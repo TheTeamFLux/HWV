@@ -18,6 +18,11 @@ public class ProblemController {
                                                @RequestParam(defaultValue = "ko") String language) {
         return problemService.findAll(userId, language);
     }
+    @GetMapping("/problems/current")
+    public Map<String, Object> currentProblem(@RequestParam Long userId,
+                                               @RequestParam(defaultValue = "ko") String language) {
+        return problemService.findCurrent(userId, language);
+    }
     @GetMapping("/problems/{id}")
     public Map<String, Object> problem(@PathVariable Long id, @RequestParam Long userId,
                                        @RequestParam(defaultValue = "ko") String language) {

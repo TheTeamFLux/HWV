@@ -4,7 +4,7 @@ import { NavLink, Outlet, useNavigate } from "react-router";
 
 import LanguageSelector from "../components/common/LanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
-import { getProblems } from "../services/problemApi";
+import { getCurrentProblem } from "../services/problemApi";
 import { getSessionUser } from "../services/session";
 import "./AppLayout.css";
 
@@ -24,8 +24,8 @@ function AppLayout() {
 
   useEffect(() => {
     let active = true;
-    getProblems(language).then((problems) => {
-      if (active) setCurrentProblem(problems.find((problem) => problem.progress > 0) || null);
+    getCurrentProblem(language).then((problem) => {
+      if (active) setCurrentProblem(problem?.id ? problem : null);
     }).catch(() => { if (active) setCurrentProblem(null); });
     return () => { active = false; };
   }, [language]);

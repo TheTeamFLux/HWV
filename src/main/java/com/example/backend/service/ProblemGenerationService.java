@@ -16,18 +16,17 @@ public class ProblemGenerationService {
     private final CodingSubmissionRepository submissionRepository;
     private final CodingProblemTranslationRepository translationRepository;
     private final UserRepository userRepository;
-    private final GeminiService geminiService;
     private final StudyStreakService studyStreakService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public ProblemGenerationService(JavaCodeExecutionService executionService, CodingProblemRepository problemRepository,
                                     CodingSubmissionRepository submissionRepository,
                                     CodingProblemTranslationRepository translationRepository,
-                                    UserRepository userRepository, GeminiService geminiService,
+                                    UserRepository userRepository,
                                     StudyStreakService studyStreakService) {
         this.executionService = executionService; this.problemRepository = problemRepository;
         this.submissionRepository = submissionRepository; this.translationRepository = translationRepository;
-        this.userRepository = userRepository; this.geminiService = geminiService;
+        this.userRepository = userRepository;
         this.studyStreakService = studyStreakService;
     }
 
@@ -36,11 +35,10 @@ public class ProblemGenerationService {
         return findAll(request.getUserId(), "ko").stream().limit(3).toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> findAll(Long userId, String language) {
-        User user = user(userId); Set<Long> solved = new HashSet<>();
-        submissionRepository.findByUserOrderBySubmittedAtDesc(user).stream().filter(CodingSubmission::isPassed)
-            .forEach(item -> solved.add(item.getProblem().getId()));
+        User user = user(userId);
+        Set<Long> solved = new HashSet<>(submissionRepository.findSolvedProblemIdsByUser(user));
         List<CodingProblem> problems = problemRepository.findByUserOrderByCreatedAtDesc(user);
         String targetLanguage = normalizeLanguage(language);
         Map<Long, CodingProblemTranslation> translations = new HashMap<>();
@@ -49,35 +47,38 @@ public class ProblemGenerationService {
                 problems.stream().map(CodingProblem::getId).toList(), targetLanguage
             ).forEach(item -> translations.put(item.getProblem().getId(), item));
         }
-        List<CodingProblem> missingTranslations = problems.stream()
-            .filter(problem -> !targetLanguage.equals(detectLanguage(problem)))
-            .filter(problem -> !translations.containsKey(problem.getId()))
-            .toList();
-        if (!missingTranslations.isEmpty()) {
-            List<CodingProblemTranslationDraft> drafts = geminiService.translateProblems(
-                missingTranslations.stream().map(this::toDraft).toList(), targetLanguage);
-            List<CodingProblemTranslation> saved = new ArrayList<>();
-            for (int index = 0; index < missingTranslations.size(); index++) {
-                saved.add(toTranslation(missingTranslations.get(index), targetLanguage, drafts.get(index)));
-            }
-            translationRepository.saveAll(saved)
-                .forEach(item -> translations.put(item.getProblem().getId(), item));
-        }
         return problems.stream().map(problem -> response(problem, solved.contains(problem.getId()),
             translations.get(problem.getId()), targetLanguage)).toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Map<String, Object> findOne(Long id, Long userId, String language) {
         CodingProblem problem = problemRepository.findByIdAndUser(id, user(userId))
             .orElseThrow(() -> new IllegalArgumentException("문제를 찾을 수 없습니다."));
         String targetLanguage = normalizeLanguage(language);
         CodingProblemTranslation translation = null;
         if (!targetLanguage.equals(detectLanguage(problem))) {
-            translation = translationRepository.findByProblemAndLanguage(problem, targetLanguage)
-                .orElseGet(() -> createTranslation(problem, targetLanguage));
+            translation = translationRepository.findByProblemAndLanguage(problem, targetLanguage).orElse(null);
         }
         return response(problem, false, translation, targetLanguage);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> findCurrent(Long userId, String language) {
+        CodingSubmission submission = submissionRepository
+            .findFirstByUserAndPassedTrueOrderBySubmittedAtDesc(user(userId))
+            .orElse(null);
+        if (submission == null) return Map.of();
+
+        CodingProblem problem = submission.getProblem();
+        String targetLanguage = normalizeLanguage(language);
+        CodingProblemTranslation translation = targetLanguage.equals(detectLanguage(problem)) ? null
+            : translationRepository.findByProblemAndLanguage(problem, targetLanguage).orElse(null);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("id", problem.getId());
+        result.put("title", translation == null ? problem.getTitle() : translation.getTitle());
+        result.put("progress", 100);
+        return result;
     }
 
     @Transactional
@@ -138,22 +139,6 @@ public class ProblemGenerationService {
         map.put("tests", responseTests);
         map.put("contentLanguage", translation == null ? detectLanguage(problem) : language);
         map.put("solved", solved); map.put("progress", solved ? 100 : 0); return map;
-    }
-
-    private CodingProblemTranslation createTranslation(CodingProblem problem, String language) {
-        CodingProblemTranslationDraft draft = geminiService.translateProblem(toDraft(problem), language);
-        return translationRepository.save(toTranslation(problem, language, draft));
-    }
-
-    private CodingProblemTranslation toTranslation(CodingProblem problem, String language,
-                                                     CodingProblemTranslationDraft draft) {
-        CodingProblemTranslation translation = new CodingProblemTranslation();
-        translation.setProblem(problem); translation.setLanguage(language);
-        translation.setGrammarName(draft.grammarName()); translation.setTitle(draft.title());
-        translation.setDescription(draft.description()); translation.setSummary(draft.summary());
-        translation.setRequirementsJson(write(draft.requirements()));
-        translation.setTestNamesJson(write(draft.testNames()));
-        return translation;
     }
 
     private String normalizeLanguage(String language) {
