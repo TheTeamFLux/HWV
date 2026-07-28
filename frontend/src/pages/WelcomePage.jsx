@@ -50,9 +50,9 @@ const copy = {
     audiences: ["Java를 처음 배우는 학생", "부족한 문법을 복습하고 싶은 사람", "자신의 코드로 학습하고 싶은 사람", "반복 학습으로 실력을 키우고 싶은 사람"],
     audienceStatement: "내가 작성한 코드를 바탕으로 부족한 Java 문법을 연습하고 싶은 학습자를 위한 서비스입니다.",
     serverEyebrow: "READY TO START", serverTitle: "이제 나만의 Java 학습을 시작해보세요.",
-    serverDescription: "무료 서버를 준비하는 동안 위에서 HWV의 학습 흐름을 확인할 수 있습니다.",
-    serverStatus: "현재 서버 상태", ready: "Ready", preparing: "Preparing...", serverReady: "서버 준비 완료", preparingServer: "서버를 준비하고 있습니다...",
-    start: "서버 시작하기", notice: "무료 서버는 첫 연결에 최대 1분 정도 걸릴 수 있습니다.",
+    serverDescription: "로그인하기 전에 HWV 서비스의 연결 상태를 확인합니다.",
+    serverStatus: "서비스 연결 상태", ready: "연결됨", preparing: "확인 중...", serverReady: "서비스 연결 완료", preparingServer: "서비스 연결 상태를 확인하고 있습니다...",
+    start: "로그인 시작하기", notice: "연결 상태를 확인하는 중에도 로그인 페이지로 이동할 수 있습니다.",
   },
   en: {
     heroTitle: "Personalized Java learning", heroAccent: "that begins with your code",
@@ -89,9 +89,9 @@ const copy = {
     audiences: ["Students learning Java for the first time", "Learners who want to review weak syntax", "People who want to learn from their own code", "Learners who improve through repetition"],
     audienceStatement: "HWV is for learners who want to practice weak Java concepts using code they wrote themselves.",
     serverEyebrow: "READY TO START", serverTitle: "Start your personalized Java learning.",
-    serverDescription: "While the free server starts, explore how learning works with HWV above.",
-    serverStatus: "Current server status", ready: "Ready", preparing: "Preparing...", serverReady: "Server ready", preparingServer: "Preparing server...",
-    start: "Start server", notice: "The free server may take up to a minute for the first connection.",
+    serverDescription: "We check the HWV service connection before you sign in.",
+    serverStatus: "Service connection", ready: "Connected", preparing: "Checking...", serverReady: "Service connected", preparingServer: "Checking the service connection...",
+    start: "Continue to sign in", notice: "You can continue to the sign-in page while the connection check is in progress.",
   },
   ja: {
     heroTitle: "コードから始まる", heroAccent: "AIパーソナライズJava学習",
@@ -128,9 +128,9 @@ const copy = {
     audiences: ["Javaを初めて学ぶ学生", "苦手な文法を復習したい方", "自分のコードで学習したい方", "反復学習で実力を伸ばしたい方"],
     audienceStatement: "自分が作成したコードをもとに、苦手なJava文法を練習したい学習者のためのサービスです。",
     serverEyebrow: "READY TO START", serverTitle: "自分だけのJava学習を始めましょう。",
-    serverDescription: "無料サーバーを準備している間に、上のHWV学習フローをご覧ください。",
-    serverStatus: "現在のサーバー状態", ready: "Ready", preparing: "Preparing...", serverReady: "サーバー準備完了", preparingServer: "サーバーを準備しています...",
-    start: "サーバーを開始", notice: "無料サーバーの初回接続には最大1分ほどかかる場合があります。",
+    serverDescription: "ログイン前にHWVサービスの接続状態を確認します。",
+    serverStatus: "サービス接続状態", ready: "接続済み", preparing: "確認中...", serverReady: "サービス接続完了", preparingServer: "サービスの接続状態を確認しています...",
+    start: "ログインへ進む", notice: "接続確認中でもログインページへ進むことができます。",
   },
 };
 

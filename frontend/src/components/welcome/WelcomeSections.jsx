@@ -194,8 +194,8 @@ export function WelcomeServerSection({ text, isReady, progress, onStart }) {
           </div>
         </div>
 
-        <button type="button" disabled={!isReady} onClick={onStart}>
-          {isReady ? text.start : text.preparing}
+        <button type="button" onClick={onStart}>
+          {text.start}
         </button>
         <p className="intro-server__notice">{text.notice}</p>
       </div>
