@@ -190,24 +190,25 @@ npm run dev
 | React DOM | 브라우저 렌더링 |
 | React Router | 페이지 라우팅 |
 | Lucide React | 아이콘 |
-| Vite | 개발 및 빌드 |
+| Vite | 개발 서버 및 빌드 |
 | ESLint | 코드 품질 검사 |
 | React Hooks ESLint Plugin | Hooks 규칙 검사 |
-| CSS | UI 스타일링 |
+| CSS | 사용자 인터페이스 스타일링 |
 
 ---
 
 #### 라이선스
 
-본 프로젝트는 **NAVER OGQ AI 공모전** 출품을 목적으로 제작되었습니다.
+본 프로젝트는 **NAVER OGQ AI 공모전** 출품을 위해 개발되었습니다.
 
-This project is licensed under the **MIT License**.
+프로젝트의 소스 코드는 **MIT License**를 따릅니다.
 
 ---
 
 # Team FLUX
 
-> **Building AI-powered educational experiences for everyone.**
+> **Find. Learn. Understand. Excel.**
 
-HWV는 AI를 활용하여 누구나 자신의 수준에 맞는 학습 기회를 누릴 수 있도록, 교육의 격차를 줄이는 서비스를 만드는 **FLUX** 팀의 프로젝트입니다.
-- Vite
+FLUX는 함께 배우고, 이해하며, 성장하는 학생 개발팀입니다.
+HWV는 FLUX의 첫 번째 프로젝트로, AI 기술을 활용하여 누구나 자신의 수준에 맞는 학습 경험을 제공하고, 교육의 격차를 줄이는 것을 목표로 개발되었습니다.
+저희는 앞으로도 AI를 통해 더 나은 교육 경험을 만드는 서비스를 만들어 나가겠습니다.
