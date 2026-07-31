@@ -107,27 +107,53 @@ HWV는 사용자가 업로드한 Java 파일을 AI가 분석하여 핵심 문법
 
 #### 실행 방법
 
-##### Backend
+##### 실행 환경
+
+- Java 17
+- Node.js 20 이상
+- MySQL
+- Gradle
+
+##### 1. 저장소 클론
 
 ```bash
 git clone https://github.com/TheTeamFLux/HWV.git
+cd HWV
+```
 
-cd backend
+##### 2. 데이터베이스 및 환경 설정
 
+MySQL 데이터베이스를 생성한 후, `src/main/resources/application.properties` 파일에 데이터베이스 정보와 Gemini API Key를 자신의 환경에 맞게 설정합니다.
+
+##### 3. Backend 실행
+
+프로젝트 루트에서 아래 명령어를 실행합니다.
+
+```bash
 ./gradlew bootRun
 ```
 
-##### Frontend
+Windows에서는
+
+```bash
+gradlew.bat bootRun
+```
+
+을 실행합니다.
+
+##### 4. Frontend 실행
+
+새 터미널을 열고 아래 명령어를 실행합니다.
 
 ```bash
 cd frontend
-
 npm install
-
 npm run dev
 ```
 
----
+##### 5. 서비스 접속
+
+Frontend 실행 후 터미널에 출력되는 주소(기본: `http://localhost:5173`)로 접속하여 서비스를 이용할 수 있습니다.
 
 #### AI 사용 내역
 
