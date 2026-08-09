@@ -238,3 +238,13 @@ Frontend 실행 후 터미널에 출력되는 주소(기본: `http://localhost:5
 FLUX는 함께 배우고, 이해하며, 성장하는 학생 개발팀입니다.
 HWV는 FLUX의 첫 번째 프로젝트로, AI 기술을 활용하여 누구나 자신의 수준에 맞는 학습 경험을 제공하고, 교육의 격차를 줄이는 것을 목표로 개발되었습니다.
 저희는 앞으로도 AI를 통해 더 나은 교육 경험을 만드는 서비스를 만들어 나가겠습니다.
+
+### Member 
+
+BE Developer <a href="https://github.com/yaeryung93">김예령</a><br>
+
+BE Developer <a href="https://github.com/heeseo033">문희서</a><br>
+
+FE Developer <a href="https://github.com/ksm524923">고성민</a><br>
+
+Designer <a href="https://github.com/iioct">이인서</a>
