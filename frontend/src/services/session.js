@@ -24,7 +24,18 @@ export function rememberRegisteredUser({ name, email }) {
   localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
 }
 
-export function saveLoginUser(loginResult, email) {
+function removeLoginData(storage) {
+  storage.removeItem(SESSION_USER_KEY);
+  storage.removeItem(USER_ID_KEY);
+  storage.removeItem(USER_NAME_KEY);
+}
+
+function findLoginStorage() {
+  if (localStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(USER_ID_KEY)) return localStorage;
+  return sessionStorage;
+}
+
+export function saveLoginUser(loginResult, email, rememberLogin = false) {
   const normalizedEmail = email.trim().toLowerCase();
   const registeredUsers = readJson(REGISTERED_USERS_KEY, {});
   const userFromResponse = loginResult?.user || loginResult || {};
@@ -41,29 +52,38 @@ export function saveLoginUser(loginResult, email) {
     email: userFromResponse.email || savedUser.email || normalizedEmail,
   };
 
-  if (user.id != null) {
-    localStorage.setItem(USER_ID_KEY, String(user.id));
-  }
-  localStorage.setItem(USER_NAME_KEY, user.name);
-  localStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+  const storage = rememberLogin ? localStorage : sessionStorage;
+  removeLoginData(localStorage);
+  removeLoginData(sessionStorage);
+  if (user.id != null) storage.setItem(USER_ID_KEY, String(user.id));
+  storage.setItem(USER_NAME_KEY, user.name);
+  storage.setItem(SESSION_USER_KEY, JSON.stringify(user));
   return user;
 }
 
 export function getSessionUser() {
-  const sessionUser = readJson(SESSION_USER_KEY, null);
+  const storage = findLoginStorage();
+  let sessionUser = null;
+  try {
+    sessionUser = JSON.parse(storage.getItem(SESSION_USER_KEY));
+  } catch { /* fall back to the individual fields below */ }
 
   if (sessionUser) {
     return sessionUser;
   }
 
   const userId = getUserId();
-  const name = localStorage.getItem(USER_NAME_KEY);
+  const name = storage.getItem(USER_NAME_KEY);
 
   return userId || name ? { id: userId, name } : null;
 }
 
 export function getUserId() {
-  return Number(localStorage.getItem(USER_ID_KEY));
+  return Number(findLoginStorage().getItem(USER_ID_KEY));
+}
+
+export function hasRememberedLogin() {
+  return Number(localStorage.getItem(USER_ID_KEY)) > 0;
 }
 
 export function isLoggedIn() {
@@ -71,7 +91,6 @@ export function isLoggedIn() {
 }
 
 export function clearSessionUser() {
-  localStorage.removeItem(SESSION_USER_KEY);
-  localStorage.removeItem(USER_ID_KEY);
-  localStorage.removeItem(USER_NAME_KEY);
+  removeLoginData(localStorage);
+  removeLoginData(sessionStorage);
 }

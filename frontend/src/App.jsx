@@ -11,14 +11,19 @@ import ProfilePage from "./pages/lab/ProfilePage";
 import StatisticsPage from "./pages/lab/StatisticsPage";
 import WrongNotesPage from "./pages/lab/WrongNotesPage";
 import WelcomePage from "./pages/WelcomePage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import { hasRememberedLogin } from "./services/session";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<WelcomePage />} />
+      <Route path="/" element={hasRememberedLogin() ? <Navigate to="/dashboard" replace /> : <WelcomePage />} />
       <Route path="/welcome" element={<WelcomePage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={hasRememberedLogin() ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route element={<AppLayout />}>
         <Route path="/home" element={<Navigate to="/dashboard" replace />} />
