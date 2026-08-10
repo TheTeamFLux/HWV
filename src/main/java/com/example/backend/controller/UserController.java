@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.dto.GoogleLoginRequest;
 import com.example.backend.service.GoogleAuthService;
+import com.example.backend.dto.PasswordResetRequest;
+import com.example.backend.dto.PasswordResetConfirmRequest;
+import com.example.backend.service.PasswordResetService;
 import java.util.Map;
 
 @RestController
@@ -16,10 +19,24 @@ public class UserController {
 
     private final UserService userService;
     private final GoogleAuthService googleAuthService;
+    private final PasswordResetService passwordResetService;
 
-    public UserController(UserService userService, GoogleAuthService googleAuthService) {
+    public UserController(UserService userService, GoogleAuthService googleAuthService, PasswordResetService passwordResetService) {
         this.userService = userService;
         this.googleAuthService = googleAuthService;
+        this.passwordResetService = passwordResetService;
+    }
+
+    @PostMapping("/password-reset/request")
+    public Map<String, String> requestPasswordReset(@Valid @RequestBody PasswordResetRequest request) {
+        passwordResetService.request(request.email());
+        return Map.of("message", "가입된 계정이라면 비밀번호 재설정 메일을 전송했습니다.");
+    }
+
+    @PostMapping("/password-reset/confirm")
+    public Map<String, String> confirmPasswordReset(@Valid @RequestBody PasswordResetConfirmRequest request) {
+        passwordResetService.confirm(request.token(), request.password());
+        return Map.of("message", "비밀번호가 변경되었습니다.");
     }
 
     @PostMapping("/register")
@@ -60,4 +77,3 @@ public class UserController {
         );
     }
 }
-
