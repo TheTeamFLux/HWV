@@ -2,7 +2,7 @@ export const translations = {
   ko: {
     language: "언어", korean: "한국어", english: "English", japanese: "日本語",
     dashboard: "대시보드", javaProblems: "Java 문제", wrongNotes: "오답노트", statistics: "학습 통계", profile: "마이페이지", logout: "로그아웃", createProblem: "새 문제 만들기", currentProgress: "현재 진행 중",
-    welcomeBack: "다시 만나서 반가워요!", loginContinue: "로그인하고 Java 학습을 계속 이어가세요.", email: "이메일", emailPlaceholder: "이메일을 입력하세요", password: "비밀번호", passwordPlaceholder: "비밀번호를 입력하세요", remember: "로그인 상태 유지", forgotPassword: "비밀번호 찾기", login: "로그인", loggingIn: "로그인 중...", noAccount: "아직 계정이 없으신가요?", signup: "회원가입",
+    welcomeBack: "다시 만나서 반가워요!", loginContinue: "로그인하고 Java 학습을 계속 이어가세요.", email: "이메일", emailPlaceholder: "이메일을 입력하세요", password: "비밀번호", passwordPlaceholder: "비밀번호를 입력하세요", remember: "로그인 상태 유지", login: "로그인", loggingIn: "로그인 중...", noAccount: "아직 계정이 없으신가요?", signup: "회원가입",
     javaPlatform: "Java Learning Platform", learnWithCode: "코드로 배우는", personalJava: "나만의 Java 학습", steadyGrowth: "HWV와 함께 더 깊이, 더 꾸준히 성장해요.", todayLearning: "오늘의 학습이 내일의 실력이 됩니다.", learningProgress: "학습 진행률",
     startLearning: "Start Java learning with HWV", signupTitle: "회원가입", signupSubtitle: "HWV와 함께 코딩 학습을 시작하세요.", name: "이름", namePlaceholder: "이름을 입력하세요", passwordConfirm: "비밀번호 확인", passwordConfirmPlaceholder: "비밀번호를 다시 입력하세요", agree: "이용약관 및 개인정보처리방침에 동의합니다.", haveAccount: "이미 계정이 있으신가요?",
     terms: "이용약관", privacy: "개인정보처리방침", uploadFile: "파일 업로드", analyzeGrammar: "문법 분석", customQuiz: "맞춤 퀴즈",
@@ -13,7 +13,7 @@ export const translations = {
   en: {
     language: "Language", korean: "한국어", english: "English", japanese: "日本語",
     dashboard: "Dashboard", javaProblems: "Java Problems", wrongNotes: "Wrong Answers", statistics: "Statistics", profile: "My Page", logout: "Log out", createProblem: "Create Problem", currentProgress: "In Progress",
-    welcomeBack: "Welcome back!", loginContinue: "Log in to continue learning Java.", email: "Email", emailPlaceholder: "Enter your email", password: "Password", passwordPlaceholder: "Enter your password", remember: "Keep me signed in", forgotPassword: "Forgot password", login: "Log in", loggingIn: "Logging in...", noAccount: "Don't have an account?", signup: "Sign up",
+    welcomeBack: "Welcome back!", loginContinue: "Log in to continue learning Java.", email: "Email", emailPlaceholder: "Enter your email", password: "Password", passwordPlaceholder: "Enter your password", remember: "Keep me signed in", login: "Log in", loggingIn: "Logging in...", noAccount: "Don't have an account?", signup: "Sign up",
     javaPlatform: "Java Learning Platform", learnWithCode: "Learn through code", personalJava: "Your own Java learning", steadyGrowth: "Grow deeper and more consistently with HWV.", todayLearning: "Today's learning becomes tomorrow's skill.", learningProgress: "Learning progress",
     startLearning: "Start Java learning with HWV", signupTitle: "Sign up", signupSubtitle: "Start your coding journey with HWV.", name: "Name", namePlaceholder: "Enter your name", passwordConfirm: "Confirm password", passwordConfirmPlaceholder: "Enter your password again", agree: "I agree to the Terms and Privacy Policy.", haveAccount: "Already have an account?",
     terms: "Terms", privacy: "Privacy Policy", uploadFile: "Upload File", analyzeGrammar: "Grammar Analysis", customQuiz: "Personalized Quiz",
@@ -24,7 +24,7 @@ export const translations = {
   ja: {
     language: "言語", korean: "한국어", english: "English", japanese: "日本語",
     dashboard: "ダッシュボード", javaProblems: "Java問題", wrongNotes: "復習ノート", statistics: "学習統計", profile: "マイページ", logout: "ログアウト", createProblem: "新しい問題を作る", currentProgress: "進行中",
-    welcomeBack: "おかえりなさい！", loginContinue: "ログインしてJava学習を続けましょう。", email: "メール", emailPlaceholder: "メールアドレスを入力", password: "パスワード", passwordPlaceholder: "パスワードを入力", remember: "ログイン状態を保持", forgotPassword: "パスワードを忘れた方", login: "ログイン", loggingIn: "ログイン中...", noAccount: "アカウントをお持ちでないですか？", signup: "会員登録",
+    welcomeBack: "おかえりなさい！", loginContinue: "ログインしてJava学習を続けましょう。", email: "メール", emailPlaceholder: "メールアドレスを入力", password: "パスワード", passwordPlaceholder: "パスワードを入力", remember: "ログイン状態を保持", login: "ログイン", loggingIn: "ログイン中...", noAccount: "アカウントをお持ちでないですか？", signup: "会員登録",
     javaPlatform: "Java Learning Platform", learnWithCode: "コードで学ぶ", personalJava: "自分だけのJava学習", steadyGrowth: "HWVと一緒に、深く着実に成長しましょう。", todayLearning: "今日の学びが明日の実力になります。", learningProgress: "学習進捗",
     startLearning: "Start Java learning with HWV", signupTitle: "会員登録", signupSubtitle: "HWVと一緒にコーディング学習を始めましょう。", name: "名前", namePlaceholder: "名前を入力", passwordConfirm: "パスワード確認", passwordConfirmPlaceholder: "パスワードを再入力", agree: "利用規約とプライバシーポリシーに同意します。", haveAccount: "すでにアカウントをお持ちですか？",
     terms: "利用規約", privacy: "プライバシーポリシー", uploadFile: "ファイルアップロード", analyzeGrammar: "文法分析", customQuiz: "カスタムクイズ",
