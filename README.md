@@ -1,5 +1,3 @@
-## NAVER OGQ AI
-
 ### HWV (Help With Vision)
 
 > **AI 기반 Java 맞춤형 학습 플랫폼**
@@ -220,14 +218,6 @@ Frontend 실행 후 터미널에 출력되는 주소(기본: `http://localhost:5
 | ESLint | 코드 품질 검사 |
 | React Hooks ESLint Plugin | Hooks 규칙 검사 |
 | CSS | 사용자 인터페이스 스타일링 |
-
----
-
-#### 라이선스
-
-본 프로젝트는 **NAVER OGQ AI 공모전** 출품을 위해 개발되었습니다.
-
-프로젝트의 소스 코드는 **MIT License**를 따릅니다.
 
 ---
 
