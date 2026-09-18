@@ -12,10 +12,9 @@
 .login-form__input-wrap input:focus { border-color: #ef7a35; box-shadow: 0 0 0 3px rgb(239 122 53 / 10%); outline: none; }
 .login-form__password-toggle { position: absolute; top: 50%; right: 9px; display: grid; width: 36px; height: 36px; padding: 0; color: #999fa7; background: transparent; border: 0; transform: translateY(-50%); cursor: pointer; place-items: center; }
 .login-form__password-toggle svg { width: 18px; height: 18px; }
-.login-form__options { display: flex; align-items: center; justify-content: space-between; margin: 2px 0 20px; }
+.login-form__options { display: flex; align-items: center; margin: 2px 0 20px; }
 .login-form__remember { display: flex; align-items: center; gap: 8px; color: #838a93; font-size: 12px; cursor: pointer; }
 .login-form__remember input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-primary); }
-.login-form__options > a { color: var(--color-primary); font-size: 12px; font-weight: 800; }
 .login-form__error { margin: -9px 0 13px; color: #d9534f; font-size: 12px; line-height: 1.5; }
 .login-form__submit { display: flex; align-items: center; justify-content: center; gap: 14px; width: 100%; height: 50px; color: #fff; background: linear-gradient(110deg, #ed8639, #df6b2d); border: 0; border-radius: 9px; box-shadow: 0 10px 20px rgb(218 104 42 / 16%); font-size: 14px; font-weight: 800; cursor: pointer; transition: transform .2s, box-shadow .2s; }
 .login-form__submit:hover:not(:disabled) { box-shadow: 0 14px 25px rgb(218 104 42 / 22%); transform: translateY(-2px); }

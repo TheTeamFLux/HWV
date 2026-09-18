@@ -1,4 +1,4 @@
-import { BarChart3, Check, Code2 } from "lucide-react";
+import { Code2 } from "lucide-react";
 import { Link } from "react-router";
 import LanguageSelector from "../components/common/LanguageSelector";
 import LoginForm from "../components/login/LoginForm";
@@ -21,10 +21,6 @@ function LoginPage() {
           <p className="login-page__description">{t("steadyGrowth")}<br />{t("todayLearning")}</p>
           <div className="login-page__learning-visual" aria-hidden="true">
             <div className="login-page__code-card"><Code2 /><span /><span /><span /></div>
-            <div className="login-page__progress-card">
-              <div><Check /><span /></div><div><Check /><span /></div><div className="login-page__progress-empty"><i /><span /></div>
-              <section><BarChart3 /><p>{t("learningProgress")}<strong>72%</strong></p></section>
-            </div>
           </div>
           <div className="login-page__decoration-dots" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</div>
         </section>

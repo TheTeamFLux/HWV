@@ -1,11 +1,11 @@
-import { BarChart3, CircleUserRound, Home, NotebookTabs, Plus, SquareCode } from "lucide-react";
+import { BarChart3, CircleUserRound, Home, LogOut, NotebookTabs, Plus, SquareCode } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router";
 
 import LanguageSelector from "../components/common/LanguageSelector";
 import { useLanguage } from "../i18n/LanguageContext";
 import { getCurrentProblem } from "../services/problemApi";
-import { getSessionUser } from "../services/session";
+import { clearSessionUser, getSessionUser } from "../services/session";
 import "./AppLayout.css";
 
 function AppLayout() {
@@ -21,6 +21,12 @@ function AppLayout() {
     { to: "/statistics", label: t("statistics"), icon: <BarChart3 /> },
     { to: "/profile", label: t("profile"), icon: <CircleUserRound /> },
   ];
+
+  function handleLogout() {
+    localStorage.removeItem("accessToken");
+    clearSessionUser();
+    navigate("/login", { replace: true });
+  }
 
   useEffect(() => {
     let active = true;
@@ -38,6 +44,9 @@ function AppLayout() {
           <LanguageSelector compact />
           <button type="button" className="lab-profile-button" onClick={() => navigate("/profile")} title={t("profile")}>
             <span className="lab-avatar">{displayName.slice(0, 1)}</span><span>{displayName}</span>
+          </button>
+          <button type="button" className="lab-logout-button" onClick={handleLogout} title={t("logout")} aria-label={t("logout")}>
+            <LogOut aria-hidden="true" /><span>{t("logout")}</span>
           </button>
         </div>
       </header>
