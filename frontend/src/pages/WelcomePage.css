@@ -121,9 +121,7 @@
 .intro-hero__logo {
   display: block;
   width: clamp(235px, 28vw, 430px);
-  height: clamp(105px, 13vw, 196px);
-  object-fit: cover;
-  object-position: center 51%;
+  height: auto;
 }
 
 .intro-hero__brand {
@@ -396,10 +394,8 @@
 .intro-server__logo {
   display: block;
   width: 180px;
-  height: 78px;
+  height: auto;
   margin-bottom: 24px;
-  object-fit: cover;
-  object-position: center 51%;
 }
 
 .intro-server__panel h2 {
@@ -635,7 +631,7 @@
 
   .intro-server { padding-inline: 14px; }
   .intro-server__panel { border-radius: 20px; }
-  .intro-server__logo { width: 145px; height: 64px; }
+  .intro-server__logo { width: 145px; height: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

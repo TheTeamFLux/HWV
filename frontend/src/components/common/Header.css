@@ -13,18 +13,17 @@
 }
 
 .header__logo {
-  display: block;
-  width: 116px;
+  display: flex;
+  align-items: center;
+  width: 132px;
   height: 52px;
-  overflow: hidden;
   flex-shrink: 0;
 }
 
 .header__logo img {
-  width: 116px;
-  height: 116px;
-  object-fit: cover;
-  object-position: center 51%;
+  display: block;
+  width: 132px;
+  height: auto;
 }
 
 .header__simple-menu {
@@ -134,6 +133,10 @@
 
 @media (max-width: 500px) {
   .header__logo {
-    width: 102px;
+    width: 116px;
+  }
+
+  .header__logo img {
+    width: 116px;
   }
 }

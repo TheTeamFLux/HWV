@@ -1,10 +1,10 @@
 .login-page { min-height: 100vh; color: var(--color-text); background: #fffaf4; }
 .login-page__header { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 max(5vw, 46px); background: rgb(255 253 249 / 94%); border-bottom: 1px solid #f0dfce; }
-.login-page__logo { display: block; width: 100px; height: 48px; overflow: hidden; }
-.login-page__logo img { display: block; width: 100px; height: 100px; object-fit: cover; object-position: center 51%; transform: translateY(-26px); }
+.login-page__logo { display: flex; align-items: center; width: 132px; height: 48px; }
+.login-page__logo img { display: block; width: 132px; height: auto; }
 .login-page__main { display: grid; align-items: center; justify-content: center; min-height: calc(100vh - 122px); padding: 28px 6vw 20px; grid-template-columns: minmax(390px, 570px) minmax(360px, 460px); gap: clamp(55px, 7vw, 110px); }
 .login-page__introduction { position: relative; padding-left: 10px; }
-.login-page__intro-logo { display: block; width: 165px; height: 70px; margin: -13px 0 -3px -4px; object-fit: cover; object-position: center; }
+.login-page__intro-logo { display: block; width: 225px; height: auto; margin: 0 0 18px -4px; }
 .login-page__eyebrow { margin: 0 0 28px; color: #8b929c; font-size: 13px; }
 .login-page__introduction h1 { margin: 0; color: #202735; font-size: clamp(37px, 3.35vw, 48px); line-height: 1.35; letter-spacing: -2px; }
 .login-page__introduction h1 span { color: var(--color-primary); }
