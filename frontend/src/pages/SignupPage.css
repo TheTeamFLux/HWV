@@ -18,16 +18,19 @@
 }
 
 .signup-page__logo {
-  display: flex;
-  align-items: center;
-  width: 132px;
+  display: block;
+  width: 100px;
   height: 48px;
+  overflow: hidden;
 }
 
 .signup-page__logo img {
   display: block;
-  width: 132px;
-  height: auto;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  object-position: center 51%;
+  transform: translateY(-26px);
 }
 
 .signup-page__main {

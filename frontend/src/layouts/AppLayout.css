@@ -21,15 +21,17 @@
 .lab-brand {
   display: flex;
   align-items: center;
-  width: 142px;
+  width: 126px;
   height: 54px;
+  overflow: hidden;
   background: transparent;
 }
 
 .lab-brand img {
-  display: block;
-  width: 142px;
-  height: auto;
+  width: 126px;
+  height: 126px;
+  object-fit: cover;
+  object-position: center 51%;
 }
 
 .lab-header__actions,
